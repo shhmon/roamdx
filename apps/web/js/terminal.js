@@ -9,7 +9,12 @@ const TerminalManager = {
   init() {
     this.term = new Terminal({
       cursorBlink: true,
+      drawBoldTextInBrightColors: true,
+      minimumContrastRatio: 1,
       fontSize: 14.2,
+      fontWeight: "500",
+      fontWeightBold: "700",
+      lineHeight: 1.05,
       fontFamily: '"JetBrainsMono Nerd Font Mono", "JetBrainsMono NFM", monospace',
       theme: {
         background: "#19212e",
