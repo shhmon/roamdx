@@ -1,228 +1,347 @@
-* {
+*, *::before, *::after {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  letter-spacing: 0.02em;
 }
 
 :root {
-  --bg: #0d1117;
-  --surface: #161b22;
-  --border: #30363d;
-  --text: #e6edf3;
-  --text-dim: #8b949e;
-  --accent: #58a6ff;
-  --danger: #f85149;
-  --success: #3fb950;
+  --bg: #19212e;
+  --surface: #1c2433;
+  --border: #2a3241;
+  --text: #c3cfd9;
+  --text-dim: #5a6a7a;
+  --accent: #75B0F7;
+  --accent-hover: #5a9ae6;
+  --danger: #f2767c;
+  --success: #9BE17D;
+  --warning: #ffcb72;
+  --radius: 6px;
+  --font: "JetBrainsMono Nerd Font Mono", "JetBrainsMono NFM", monospace;
 }
 
 body {
   background: var(--bg);
   color: var(--text);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: var(--font);
+  font-size: 13px;
   height: 100dvh;
   overflow: hidden;
 }
 
+/* ── Layout ── */
+
 #app {
-  display: grid;
-  grid-template-columns: 240px 1fr;
-  grid-template-rows: 48px 1fr;
+  display: flex;
+  flex-direction: column;
   height: 100dvh;
 }
 
 #topbar {
-  grid-column: 1 / -1;
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 0 16px;
+  justify-content: space-between;
+  height: 40px;
+  padding: 0 12px;
   background: var(--surface);
   border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
 }
 
-#topbar h1 {
-  font-size: 16px;
+.topbar-left, .topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.logo {
+  font-size: 13px;
   font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--text-dim);
 }
 
-.dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
+#main-layout {
+  display: flex;
+  flex: 1;
+  min-height: 0;
 }
 
-.dot.connected { background: var(--success); }
-.dot.disconnected { background: var(--danger); }
-.dot.connecting { background: #d29922; }
+/* ── Sidebar ── */
 
 #sidebar {
+  width: 220px;
+  flex-shrink: 0;
   background: var(--surface);
   border-right: 1px solid var(--border);
+  padding: 12px;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 1px;
+  gap: 4px;
 }
 
 #sidebar section {
-  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
 #sidebar h2 {
-  font-size: 12px;
+  font-size: 10px;
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.08em;
   color: var(--text-dim);
-  margin-bottom: 8px;
 }
+
+#sidebar hr {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 4px 0;
+}
+
+/* ── Session list ── */
 
 #session-list {
   list-style: none;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 1px;
 }
 
 #session-list li {
-  padding: 6px 8px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 14px;
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
+  padding: 5px 8px;
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--text);
+  transition: background 0.1s;
 }
 
 #session-list li:hover {
-  background: var(--border);
+  background: rgba(255,255,255,0.05);
 }
 
 #session-list li.active {
-  background: var(--accent);
-  color: #000;
+  background: rgba(117,176,247,0.12);
+  color: var(--accent);
 }
 
 #session-list li .delete-btn {
-  background: none;
-  border: none;
-  color: inherit;
+  all: unset;
   cursor: pointer;
   opacity: 0;
   font-size: 14px;
-  padding: 0 4px;
+  line-height: 1;
+  padding: 0 2px;
+  transition: opacity 0.1s;
 }
 
-#session-list li:hover .delete-btn {
-  opacity: 0.6;
-}
+#session-list li:hover .delete-btn { opacity: 0.4; }
+#session-list li .delete-btn:hover { opacity: 1; }
+#session-list li.active .delete-btn { color: var(--accent); }
 
-#session-list li .delete-btn:hover {
-  opacity: 1;
-}
+/* ── Form elements ── */
 
-#new-session {
+.input-row {
   display: flex;
   gap: 4px;
-  margin-top: 8px;
 }
 
 input, textarea {
   background: var(--bg);
   border: 1px solid var(--border);
   color: var(--text);
-  border-radius: 4px;
+  border-radius: var(--radius);
   padding: 6px 8px;
-  font-size: 13px;
-  font-family: inherit;
+  font-size: 12px;
+  font-family: var(--font);
   width: 100%;
+  outline: none;
+  transition: border-color 0.15s;
 }
 
 input:focus, textarea:focus {
-  outline: none;
   border-color: var(--accent);
 }
 
-button {
-  background: var(--accent);
-  color: #000;
-  border: none;
-  border-radius: 4px;
-  padding: 6px 12px;
-  cursor: pointer;
-  font-size: 13px;
-  font-weight: 600;
-  white-space: nowrap;
+input::placeholder, textarea::placeholder {
+  color: var(--text-dim);
 }
 
-button:hover {
-  opacity: 0.9;
-}
-
-#claude-prompt {
+textarea {
   resize: vertical;
-  min-height: 60px;
+  min-height: 54px;
 }
 
-#claude-send {
-  margin-top: 8px;
+button {
+  font-family: var(--font);
+  font-size: 12px;
+  cursor: pointer;
+  border: none;
+  border-radius: var(--radius);
+  transition: background 0.15s, opacity 0.15s;
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.btn-primary {
+  background: rgba(117,176,247,0.15);
+  color: var(--accent);
+  font-weight: 600;
+  padding: 6px 14px;
   width: 100%;
 }
 
-#terminal-container {
-  overflow: hidden;
-  padding: 4px;
+.btn-primary:hover:not(:disabled) {
+  background: rgba(117,176,247,0.25);
 }
 
-/* Auth overlay */
-.overlay {
+.btn-sm {
+  background: rgba(117,176,247,0.15);
+  color: var(--accent);
+  font-weight: 700;
+  padding: 6px 10px;
+  font-size: 14px;
+  line-height: 1;
+}
+
+.btn-sm:hover {
+  background: rgba(117,176,247,0.25);
+}
+
+.icon-btn {
+  background: none;
+  color: var(--text-dim);
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  border-radius: var(--radius);
+}
+
+.icon-btn:hover {
+  color: var(--text);
+  background: rgba(255,255,255,0.05);
+}
+
+/* ── Terminal ── */
+
+#terminal-container {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  background: var(--bg);
+}
+
+#terminal-container .xterm {
+  padding: 10px 14px 0;
+}
+
+#terminal-container .xterm-viewport {
+  overflow-y: hidden !important;
+}
+
+#terminal-container .xterm-viewport::-webkit-scrollbar {
+  display: none;
+}
+
+/* ── Status dot ── */
+
+.dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--danger);
+  flex-shrink: 0;
+}
+
+.dot.connected   { background: var(--success); }
+.dot.connecting   { background: var(--warning); }
+.dot.disconnected { background: var(--danger); }
+
+/* ── Auth overlay ── */
+
+#auth-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.85);
+  background: rgba(0,0,0,0.85);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 100;
 }
 
-.overlay.hidden {
+#auth-overlay.hidden {
   display: none;
 }
 
-.overlay-content {
+.auth-card {
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 32px;
+  border-radius: 10px;
+  padding: 28px 24px;
+  width: 280px;
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: 12px;
-  width: 300px;
 }
 
-.overlay-content h2 {
+.auth-card input {
   text-align: center;
 }
 
-/* Mobile */
+#auth-error {
+  color: var(--danger);
+  font-size: 11px;
+  min-height: 16px;
+  text-align: center;
+}
+
+/* ── Fullscreen mode ── */
+
+#app.fullscreen #topbar,
+#app.fullscreen #sidebar {
+  display: none;
+}
+
+/* Exit-fullscreen button — fixed top-right, visible on hover */
+#exit-fullscreen {
+  position: fixed;
+  top: 8px;
+  right: 8px;
+  z-index: 50;
+  opacity: 0;
+  transition: opacity 0.2s;
+  pointer-events: none;
+}
+
+#app.fullscreen #exit-fullscreen {
+  pointer-events: auto;
+}
+
+#app.fullscreen #exit-fullscreen:hover {
+  opacity: 1;
+}
+
+/* ── Mobile ── */
+
 @media (max-width: 640px) {
-  #app {
-    grid-template-columns: 1fr;
-    grid-template-rows: 48px auto 1fr;
+  #main-layout {
+    flex-direction: column;
   }
 
   #sidebar {
+    width: 100%;
+    max-height: 180px;
     border-right: none;
     border-bottom: 1px solid var(--border);
-    max-height: 200px;
-    flex-direction: row;
-    overflow-x: auto;
-  }
-
-  #sidebar section {
-    min-width: 200px;
-  }
-
-  #claude-panel {
-    border-left: 1px solid var(--border);
   }
 }

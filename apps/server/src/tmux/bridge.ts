@@ -36,7 +36,6 @@ export async function listSessions(): Promise<TmuxSession[]> {
         };
       });
   } catch {
-    // tmux server not running
     return [];
   }
 }
@@ -69,24 +68,4 @@ export async function sendKeys(session: string, keys: string): Promise<void> {
 
 export async function sendSpecialKey(session: string, key: string): Promise<void> {
   await tmux("send-keys", "-t", sanitizeName(session), key);
-}
-
-export async function capturePane(session: string): Promise<string> {
-  return tmux("capture-pane", "-t", sanitizeName(session), "-p", "-J");
-}
-
-export async function resizeWindow(
-  session: string,
-  cols: number,
-  rows: number
-): Promise<void> {
-  await tmux(
-    "resize-window",
-    "-t",
-    sanitizeName(session),
-    "-x",
-    String(cols),
-    "-y",
-    String(rows)
-  );
 }

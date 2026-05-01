@@ -10,9 +10,6 @@ importers:
 
   apps/server:
     dependencies:
-      '@fastify/bearer-auth':
-        specifier: ^10.0.0
-        version: 10.1.2
       '@fastify/cors':
         specifier: ^10.0.0
         version: 10.1.0
@@ -217,9 +214,6 @@ packages:
 
   '@fastify/ajv-compiler@4.0.5':
     resolution: {integrity: sha512-KoWKW+MhvfTRWL4qrhUwAAZoaChluo0m0vbiJlGMt2GXvL4LVPQEjt8kSpHI3IBq5Rez8fg+XeH3cneztq+C7A==}
-
-  '@fastify/bearer-auth@10.1.2':
-    resolution: {integrity: sha512-9WaHql+IdH03doWS1pNDcO/AcAVskoESAC+sI56+euTWMW12ZUz+xTMNPvIwr8jMJlnTnrU9aI+lD7LMWf9POA==}
 
   '@fastify/cors@10.1.0':
     resolution: {integrity: sha512-MZyBCBJtII60CU9Xme/iE4aEy8G7QpzGR8zkdXZkDFt7ElEMachbE61tfhAG/bvSaULlqlf0huMT12T7iqEmdQ==}
@@ -1008,11 +1002,6 @@ snapshots:
       ajv: 8.20.0
       ajv-formats: 3.0.1(ajv@8.20.0)
       fast-uri: 3.1.0
-
-  '@fastify/bearer-auth@10.1.2':
-    dependencies:
-      '@fastify/error': 4.2.0
-      fastify-plugin: 5.1.0
 
   '@fastify/cors@10.1.0':
     dependencies:

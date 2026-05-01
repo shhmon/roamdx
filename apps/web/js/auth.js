@@ -23,52 +23,46 @@ const Auth = {
     const submit = document.getElementById("token-submit");
     const error = document.getElementById("auth-error");
 
-    const showLogin = () => {
-      overlay.classList.remove("hidden");
-      if (error) error.textContent = "";
-    };
+    const show = () => overlay.classList.remove("hidden");
+    const hide = () => overlay.classList.add("hidden");
 
     if (this.isAuthenticated()) {
-      // Validate stored token against server
+      hide();
       fetch("/api/sessions", {
         headers: { Authorization: `Bearer ${this.getToken()}` },
       }).then((res) => {
         if (res.ok) {
-          overlay.classList.add("hidden");
           App.init();
         } else {
           this.clearToken();
-          showLogin();
+          show();
         }
-      }).catch(() => showLogin());
+      }).catch(() => show());
       return;
     }
-
-    showLogin();
 
     const doLogin = async () => {
       const token = input.value.trim();
       if (!token) return;
 
       submit.disabled = true;
-      submit.textContent = "Checking...";
+      submit.textContent = "Connecting...";
 
       try {
         const res = await fetch("/api/sessions", {
           headers: { Authorization: `Bearer ${token}` },
         });
-
         if (res.ok) {
           this.setToken(token);
-          overlay.classList.add("hidden");
+          hide();
           App.init();
         } else {
-          if (error) error.textContent = "Invalid token";
+          error.textContent = "Invalid token";
           input.value = "";
           input.focus();
         }
       } catch {
-        if (error) error.textContent = "Cannot reach server";
+        error.textContent = "Cannot reach server";
       } finally {
         submit.disabled = false;
         submit.textContent = "Connect";

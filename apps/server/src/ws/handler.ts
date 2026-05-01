@@ -27,16 +27,14 @@ export function handleConnection(ws: WebSocket) {
           return;
         }
         attachedSession = msg.sessionId;
-        const cols = (msg as any).cols || DEFAULT_COLS;
-        const rows = (msg as any).rows || DEFAULT_ROWS;
-        attachToSession(msg.sessionId, ws, cols, rows);
+        attachToSession(msg.sessionId, ws, msg.cols ?? DEFAULT_COLS, msg.rows ?? DEFAULT_ROWS);
         ws.send(JSON.stringify({ type: "attached", session: { name: msg.sessionId } }));
         break;
       }
 
       case "input": {
         if (!attachedSession) {
-          ws.send(JSON.stringify({ type: "error", message: "Not attached to any session" }));
+          ws.send(JSON.stringify({ type: "error", message: "Not attached" }));
           return;
         }
         writeInput(attachedSession, msg.data);

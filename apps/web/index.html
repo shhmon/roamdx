@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" style="background: #0d1117;">
+<html lang="en" style="background:#19212e">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -10,36 +10,56 @@
 <body>
   <div id="app">
     <header id="topbar">
-      <h1>RoamDX</h1>
-      <span id="status-dot" class="dot disconnected"></span>
+      <div class="topbar-left">
+        <span class="logo">roamdx</span>
+        <span id="status-dot" class="dot"></span>
+      </div>
+      <div class="topbar-right">
+        <button id="fullscreen-btn" class="icon-btn" title="Fullscreen">
+          <svg class="icon-expand" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/>
+          </svg>
+          <svg class="icon-shrink" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none">
+            <polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/><line x1="14" y1="10" x2="21" y2="3"/><line x1="3" y1="21" x2="10" y2="14"/>
+          </svg>
+        </button>
+      </div>
     </header>
 
-    <aside id="sidebar">
-      <section id="sessions-panel">
-        <h2>Sessions</h2>
-        <ul id="session-list"></ul>
-        <div id="new-session">
-          <input type="text" id="new-session-name" placeholder="session name">
-          <button id="new-session-btn">+</button>
-        </div>
-      </section>
+    <div id="main-layout">
+      <aside id="sidebar">
+        <section>
+          <h2>Sessions</h2>
+          <ul id="session-list"></ul>
+          <div class="input-row">
+            <input type="text" id="new-session-name" placeholder="new session">
+            <button id="new-session-btn" class="btn-sm">+</button>
+          </div>
+        </section>
+        <hr>
+        <section>
+          <h2>Claude</h2>
+          <textarea id="claude-prompt" placeholder="Send a task..." rows="3"></textarea>
+          <button id="claude-send" class="btn-primary">Send</button>
+        </section>
+      </aside>
 
-      <section id="claude-panel">
-        <h2>Claude</h2>
-        <textarea id="claude-prompt" placeholder="Send a task to Claude..." rows="3"></textarea>
-        <button id="claude-send">Send</button>
-      </section>
-    </aside>
+      <main id="terminal-container"></main>
+    </div>
 
-    <main id="terminal-container"></main>
+    <button id="exit-fullscreen" class="icon-btn" title="Exit fullscreen">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/><line x1="14" y1="10" x2="21" y2="3"/><line x1="3" y1="21" x2="10" y2="14"/>
+      </svg>
+    </button>
   </div>
 
-  <div id="auth-overlay" class="overlay">
-    <div class="overlay-content">
-      <h2>RoamDX</h2>
-      <input type="password" id="token-input" placeholder="Enter access token">
-      <p id="auth-error" style="color: var(--danger); font-size: 13px; min-height: 18px;"></p>
-      <button id="token-submit">Connect</button>
+  <div id="auth-overlay">
+    <div class="auth-card">
+      <span class="logo" style="font-size:16px; color:var(--text)">roamdx</span>
+      <input type="password" id="token-input" placeholder="access token" autofocus>
+      <p id="auth-error"></p>
+      <button id="token-submit" class="btn-primary">Connect</button>
     </div>
   </div>
 

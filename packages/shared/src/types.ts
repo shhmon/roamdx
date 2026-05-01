@@ -5,7 +5,3 @@ export interface TmuxSession {
   cols: number;
   rows: number;
 }
-
-export interface SessionListResponse {
-  sessions: TmuxSession[];
-}

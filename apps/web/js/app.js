@@ -14,9 +14,22 @@ const App = {
       if (e.key === "Enter") this.createSession();
     });
 
+    document.getElementById("fullscreen-btn").addEventListener("click", () => this.enterFullscreen());
+    document.getElementById("exit-fullscreen").addEventListener("click", () => this.exitFullscreen());
+
     await this.refreshSessions();
-    // Poll session list every 5s
     this.pollTimer = setInterval(() => this.refreshSessions(), 5000);
+  },
+
+  enterFullscreen() {
+    document.getElementById("app").classList.add("fullscreen");
+    setTimeout(() => TerminalManager.fitAddon.fit(), 50);
+    TerminalManager.term.focus();
+  },
+
+  exitFullscreen() {
+    document.getElementById("app").classList.remove("fullscreen");
+    setTimeout(() => TerminalManager.fitAddon.fit(), 50);
   },
 
   async refreshSessions() {
@@ -98,5 +111,4 @@ const App = {
   },
 };
 
-// Boot — Auth.init() validates token and calls App.init() on success
 Auth.init();

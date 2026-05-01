@@ -9,13 +9,31 @@ const TerminalManager = {
   init() {
     this.term = new Terminal({
       cursorBlink: true,
-      fontSize: 14,
-      fontFamily: '"SF Mono", "Fira Code", "Cascadia Code", monospace',
+      fontSize: 14.2,
+      fontFamily: '"JetBrainsMono Nerd Font Mono", "JetBrainsMono NFM", monospace',
       theme: {
-        background: "#0d1117",
-        foreground: "#e6edf3",
-        cursor: "#58a6ff",
-        selectionBackground: "#264f78",
+        background: "#19212e",
+        foreground: "#c3cfd9",
+        cursor: "#c3cfd9",
+        cursorAccent: "#1c2433",
+        selectionBackground: "#303847",
+        selectionForeground: "#c3cfd9",
+        black: "#1c2433",
+        brightBlack: "#444c5b",
+        red: "#f2767c",
+        brightRed: "#f85370",
+        green: "#9BE17D",
+        brightGreen: "#9bdead",
+        yellow: "#ffcb72",
+        brightYellow: "#f6d96d",
+        blue: "#75B0F7",
+        brightBlue: "#6B9BD1",
+        magenta: "#B58DF5",
+        brightMagenta: "#ee9cdd",
+        cyan: "#08bdba",
+        brightCyan: "#6bdbda",
+        white: "#c3cfd9",
+        brightWhite: "#c3cfd9",
       },
     });
 
@@ -26,13 +44,11 @@ const TerminalManager = {
     this.term.open(container);
     this.fitAddon.fit();
 
-    // Resize observer
     new ResizeObserver(() => {
       this.fitAddon.fit();
       this.sendResize();
     }).observe(container);
 
-    // Handle viewport changes (mobile keyboard)
     if (window.visualViewport) {
       window.visualViewport.addEventListener("resize", () => {
         this.fitAddon.fit();
@@ -40,7 +56,6 @@ const TerminalManager = {
       });
     }
 
-    // Input from terminal -> WS
     this.term.onData((data) => {
       this.send({ type: "input", data });
     });
@@ -56,10 +71,8 @@ const TerminalManager = {
     this.ws = new WebSocket(`${proto}//${location.host}/ws?token=${encodeURIComponent(token)}`);
 
     this.ws.onopen = () => {
-      console.log("[ws] connected");
       this.setStatus("connected");
       this.reconnectDelay = 1000;
-      // Re-attach if we were attached
       if (this.currentSession) {
         this.attach(this.currentSession);
       }
@@ -75,22 +88,17 @@ const TerminalManager = {
           this.setStatus("connected");
           break;
         case "error":
-          console.error("Server error:", msg.message);
-          break;
-        case "sessions":
-          if (typeof App !== "undefined") App.updateSessions(msg.sessions);
+          console.error("[roamdx]", msg.message);
           break;
       }
     };
 
-    this.ws.onclose = (e) => {
-      console.log("[ws] closed:", e.code, e.reason);
+    this.ws.onclose = () => {
       this.setStatus("disconnected");
       this.scheduleReconnect();
     };
 
-    this.ws.onerror = (e) => {
-      console.error("[ws] error:", e);
+    this.ws.onerror = () => {
       this.setStatus("disconnected");
     };
   },
@@ -106,10 +114,7 @@ const TerminalManager = {
 
   send(msg) {
     if (this.ws?.readyState === WebSocket.OPEN) {
-      console.log("[ws] send:", msg.type, msg.type === "input" ? "" : msg);
       this.ws.send(JSON.stringify(msg));
-    } else {
-      console.warn("[ws] not open, dropping:", msg.type);
     }
   },
 
@@ -131,7 +136,6 @@ const TerminalManager = {
     this.send({ type: "detach" });
     this.currentSession = null;
     this.term.reset();
-    this.term.write("No session attached. Select one from the sidebar.");
   },
 
   setStatus(state) {
