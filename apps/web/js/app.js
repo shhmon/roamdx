@@ -37,7 +37,7 @@ const App = {
   showHome() {
     document.getElementById("home-view").classList.remove("hidden");
     document.getElementById("terminal-container").style.display = "none";
-    this.renderHomeGrid();
+    this.refreshSessions();
   },
 
   showTerminal() {
