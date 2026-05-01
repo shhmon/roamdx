@@ -243,6 +243,31 @@ button:disabled {
   padding: 32px;
 }
 
+#home-content {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  max-width: 560px;
+  width: 100%;
+}
+
+#home-header {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+#home-header h1 {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+#home-header p {
+  font-size: 11px;
+  color: var(--text-dim);
+}
+
 #home-view.hidden {
   display: none;
 }
@@ -251,7 +276,6 @@ button:disabled {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 12px;
-  max-width: 560px;
   width: 100%;
 }
 

@@ -137,6 +137,7 @@ const App = {
     }
 
     // Update home grid if visible
+    document.getElementById("home-count").textContent = `${sessions.length} total`;
     if (!document.getElementById("home-view").classList.contains("hidden")) {
       this.renderHomeGrid();
     }
