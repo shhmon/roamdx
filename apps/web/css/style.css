@@ -353,6 +353,18 @@ button:disabled {
   border-color: var(--accent);
 }
 
+.home-tile-new {
+  align-items: center;
+  justify-content: center;
+  border-style: dashed;
+}
+
+.tile-plus {
+  font-size: 28px;
+  color: var(--text-dim);
+  line-height: 1;
+}
+
 /* ── Terminal ── */
 
 #terminal-container {

@@ -89,12 +89,20 @@ const App = {
       grid.appendChild(tile);
     }
 
-    if (this.sessions.length === 0) {
-      const empty = document.createElement("div");
-      empty.style.cssText = "grid-column: 1/-1; text-align:center; color:var(--text-dim); font-size:12px; padding:24px;";
-      empty.textContent = "No active sessions";
-      grid.appendChild(empty);
-    }
+    // Add "new session" tile
+    const newTile = document.createElement("div");
+    newTile.className = "home-tile home-tile-new";
+    newTile.innerHTML = '<span class="tile-plus">+</span>';
+    newTile.addEventListener("click", async () => {
+      const name = "session-" + Date.now().toString(36);
+      await Api.createSession(name);
+      await this.refreshSessions();
+      this.activeSession = name;
+      this.showTerminal();
+      TerminalManager.attach(name);
+      this.updateSessions(this.sessions);
+    });
+    grid.appendChild(newTile);
   },
 
   enterFullscreen() {
