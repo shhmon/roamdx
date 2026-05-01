@@ -28,10 +28,8 @@ const Auth = {
 
     if (this.isAuthenticated()) {
       hide();
-      fetch("/api/sessions", {
-        headers: { Authorization: `Bearer ${this.getToken()}` },
-      }).then((res) => {
-        if (res.ok) {
+      Api.validateToken(this.getToken()).then((ok) => {
+        if (ok) {
           App.init();
         } else {
           this.clearToken();
@@ -49,10 +47,7 @@ const Auth = {
       submit.textContent = "Connecting...";
 
       try {
-        const res = await fetch("/api/sessions", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (res.ok) {
+        if (await Api.validateToken(token)) {
           this.setToken(token);
           hide();
           App.init();

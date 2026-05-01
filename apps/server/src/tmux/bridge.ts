@@ -62,6 +62,10 @@ export async function hasSession(name: string): Promise<boolean> {
   }
 }
 
+export async function capturePane(session: string): Promise<string> {
+  return tmux("capture-pane", "-t", sanitizeName(session), "-p", "-e");
+}
+
 export async function sendKeys(session: string, keys: string): Promise<void> {
   await tmux("send-keys", "-t", sanitizeName(session), "-l", keys);
 }

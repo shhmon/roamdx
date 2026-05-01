@@ -1,11 +1,23 @@
 import type { FastifyInstance } from "fastify";
-import { listSessions, createSession, killSession } from "../tmux/bridge.js";
+import { listSessions, createSession, killSession, capturePane } from "../tmux/bridge.js";
 
 export async function sessionRoutes(app: FastifyInstance) {
   app.get("/api/sessions", async () => {
     const sessions = await listSessions();
     return { sessions };
   });
+
+  app.get<{ Params: { name: string } }>(
+    "/api/sessions/:name/preview",
+    async (req, reply) => {
+      try {
+        const content = await capturePane(req.params.name);
+        return { content };
+      } catch {
+        return reply.status(404).send({ error: "Session not found" });
+      }
+    }
+  );
 
   app.post<{ Body: { name: string; cols?: number; rows?: number } }>(
     "/api/sessions",

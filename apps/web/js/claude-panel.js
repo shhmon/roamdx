@@ -11,25 +11,12 @@ const ClaudePanel = {
       sendBtn.textContent = "Sending...";
 
       try {
-        const res = await fetch("/api/claude/task", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${Auth.getToken()}`,
-          },
-          body: JSON.stringify({ prompt }),
-        });
-
-        if (!res.ok) throw new Error("Failed");
-
-        const data = await res.json();
+        const data = await Api.sendClaudeTask(prompt);
         textarea.value = "";
-
-        // Auto-attach to claude session
         TerminalManager.attach(data.sessionId);
         App.setActiveSession(data.sessionId);
       } catch (err) {
-        console.error("Claude task failed:", err);
+        console.error("[roamdx] Claude task failed:", err);
       } finally {
         sendBtn.disabled = false;
         sendBtn.textContent = "Send";

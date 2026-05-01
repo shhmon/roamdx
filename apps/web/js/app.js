@@ -58,6 +58,12 @@ const App = {
       name.className = "tile-name";
       name.textContent = s.name;
 
+      const canvas = document.createElement("canvas");
+      canvas.className = "tile-preview";
+      canvas.width = s.cols;
+      canvas.height = s.rows;
+      Preview.render(s.name, canvas, s.cols, s.rows);
+
       const meta = document.createElement("div");
       meta.className = "tile-meta";
       const created = new Date(parseInt(s.created) * 1000);
@@ -65,6 +71,7 @@ const App = {
       meta.innerHTML = `<span>${s.cols}x${s.rows}</span><span>${ago}</span>`;
 
       tile.appendChild(name);
+      tile.appendChild(canvas);
       tile.appendChild(meta);
       tile.addEventListener("click", () => {
         this.activeSession = s.name;
@@ -96,19 +103,14 @@ const App = {
 
   async refreshSessions() {
     try {
-      const res = await fetch("/api/sessions", {
-        headers: { Authorization: `Bearer ${Auth.getToken()}` },
-      });
-      if (!res.ok) return;
-      const data = await res.json();
-      this.updateSessions(data.sessions);
+      const sessions = await Api.listSessions();
+      this.updateSessions(sessions);
     } catch {}
   },
 
   updateSessions(sessions) {
     this.sessions = sessions;
 
-    // Sidebar list
     const list = document.getElementById("session-list");
     list.innerHTML = "";
 
@@ -136,7 +138,6 @@ const App = {
       list.appendChild(li);
     }
 
-    // Update home grid if visible
     document.getElementById("home-count").textContent = `${sessions.length} total`;
     if (!document.getElementById("home-view").classList.contains("hidden")) {
       this.renderHomeGrid();
@@ -155,15 +156,20 @@ const App = {
     if (!name) return;
 
     try {
-      await fetch("/api/sessions", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${Auth.getToken()}`,
-        },
-        body: JSON.stringify({ name }),
-      });
+      await Api.createSession(name);
       input.value = "";
+      await this.refreshSessions();
+    } catch {}
+  },
+
+  async deleteSession(name) {
+    try {
+      await Api.deleteSession(name);
+      if (this.activeSession === name) {
+        TerminalManager.detach();
+        this.activeSession = null;
+        this.showHome();
+      }
       await this.refreshSessions();
     } catch {}
   },
@@ -177,21 +183,6 @@ const App = {
     if (hours < 24) return `${hours}h ago`;
     const days = Math.floor(hours / 24);
     return `${days}d ago`;
-  },
-
-  async deleteSession(name) {
-    try {
-      await fetch(`/api/sessions/${encodeURIComponent(name)}`, {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${Auth.getToken()}` },
-      });
-      if (this.activeSession === name) {
-        TerminalManager.detach();
-        this.activeSession = null;
-        this.showHome();
-      }
-      await this.refreshSessions();
-    } catch {}
   },
 };
 
