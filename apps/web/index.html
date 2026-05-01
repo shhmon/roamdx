@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>RoamDX</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@xterm/xterm@5.5.0/css/xterm.min.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div id="app">
+    <header id="topbar">
+      <h1>RoamDX</h1>
+      <span id="status-dot" class="dot disconnected"></span>
+    </header>
+
+    <aside id="sidebar">
+      <section id="sessions-panel">
+        <h2>Sessions</h2>
+        <ul id="session-list"></ul>
+        <div id="new-session">
+          <input type="text" id="new-session-name" placeholder="session name">
+          <button id="new-session-btn">+</button>
+        </div>
+      </section>
+
+      <section id="claude-panel">
+        <h2>Claude</h2>
+        <textarea id="claude-prompt" placeholder="Send a task to Claude..." rows="3"></textarea>
+        <button id="claude-send">Send</button>
+      </section>
+    </aside>
+
+    <main id="terminal-container"></main>
+  </div>
+
+  <div id="auth-overlay" class="overlay">
+    <div class="overlay-content">
+      <h2>RoamDX</h2>
+      <input type="password" id="token-input" placeholder="Enter access token">
+      <button id="token-submit">Connect</button>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@xterm/xterm@5.5.0/lib/xterm.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@xterm/addon-fit@0.10.0/lib/addon-fit.min.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/terminal.js"></script>
+  <script src="js/claude-panel.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

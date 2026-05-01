@@ -1,0 +1,13 @@
+{
+  "name": "roamdx",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "pnpm -C apps/server dev",
+    "build": "pnpm -C apps/server build",
+    "start": "pnpm -C apps/server start"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": ["esbuild"]
+  }
+}
