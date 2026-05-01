@@ -10,7 +10,7 @@ import { sessionRoutes } from "./routes/sessions.js";
 import { claudeRoutes } from "./routes/claude.js";
 import { statusRoutes } from "./routes/status.js";
 import { handleConnection } from "./ws/handler.js";
-import { shutdown } from "./tmux/stream-manager.js";
+import { shutdown } from "./pty/manager.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 

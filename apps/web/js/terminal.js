@@ -56,6 +56,7 @@ const TerminalManager = {
     this.ws = new WebSocket(`${proto}//${location.host}/ws?token=${encodeURIComponent(token)}`);
 
     this.ws.onopen = () => {
+      console.log("[ws] connected");
       this.setStatus("connected");
       this.reconnectDelay = 1000;
       // Re-attach if we were attached
@@ -68,7 +69,6 @@ const TerminalManager = {
       const msg = JSON.parse(event.data);
       switch (msg.type) {
         case "output":
-          this.term.reset();
           this.term.write(msg.data);
           break;
         case "attached":
@@ -83,12 +83,14 @@ const TerminalManager = {
       }
     };
 
-    this.ws.onclose = () => {
+    this.ws.onclose = (e) => {
+      console.log("[ws] closed:", e.code, e.reason);
       this.setStatus("disconnected");
       this.scheduleReconnect();
     };
 
-    this.ws.onerror = () => {
+    this.ws.onerror = (e) => {
+      console.error("[ws] error:", e);
       this.setStatus("disconnected");
     };
   },
@@ -104,7 +106,10 @@ const TerminalManager = {
 
   send(msg) {
     if (this.ws?.readyState === WebSocket.OPEN) {
+      console.log("[ws] send:", msg.type, msg.type === "input" ? "" : msg);
       this.ws.send(JSON.stringify(msg));
+    } else {
+      console.warn("[ws] not open, dropping:", msg.type);
     }
   },
 
@@ -117,8 +122,8 @@ const TerminalManager = {
   attach(sessionId) {
     this.currentSession = sessionId;
     this.term.reset();
-    this.send({ type: "attach", sessionId });
-    this.sendResize();
+    this.fitAddon.fit();
+    this.send({ type: "attach", sessionId, cols: this.term.cols, rows: this.term.rows });
     this.term.focus();
   },
 

@@ -98,8 +98,5 @@ const App = {
   },
 };
 
-// Boot
+// Boot — Auth.init() validates token and calls App.init() on success
 Auth.init();
-if (Auth.isAuthenticated()) {
-  App.init();
-}

@@ -1,7 +1,8 @@
 import type { WebSocket } from "ws";
 import type { ClientMessage } from "@roamdx/shared";
-import { sendKeys, sendSpecialKey, resizeWindow, hasSession, listSessions } from "../tmux/bridge.js";
-import { addClient, removeClient } from "../tmux/stream-manager.js";
+import { DEFAULT_COLS, DEFAULT_ROWS } from "@roamdx/shared";
+import { hasSession } from "../tmux/bridge.js";
+import { attachToSession, detachClient, writeInput, resizeSession } from "../pty/manager.js";
 
 export function handleConnection(ws: WebSocket) {
   let attachedSession: string | null = null;
@@ -18,7 +19,7 @@ export function handleConnection(ws: WebSocket) {
     switch (msg.type) {
       case "attach": {
         if (attachedSession) {
-          removeClient(attachedSession, ws);
+          detachClient(attachedSession, ws);
         }
         const exists = await hasSession(msg.sessionId);
         if (!exists) {
@@ -26,13 +27,10 @@ export function handleConnection(ws: WebSocket) {
           return;
         }
         attachedSession = msg.sessionId;
-        addClient(msg.sessionId, ws);
-
-        const sessions = await listSessions();
-        const session = sessions.find((s) => s.name === msg.sessionId);
-        if (session) {
-          ws.send(JSON.stringify({ type: "attached", session }));
-        }
+        const cols = (msg as any).cols || DEFAULT_COLS;
+        const rows = (msg as any).rows || DEFAULT_ROWS;
+        attachToSession(msg.sessionId, ws, cols, rows);
+        ws.send(JSON.stringify({ type: "attached", session: { name: msg.sessionId } }));
         break;
       }
 
@@ -41,19 +39,19 @@ export function handleConnection(ws: WebSocket) {
           ws.send(JSON.stringify({ type: "error", message: "Not attached to any session" }));
           return;
         }
-        await sendKeys(attachedSession, msg.data);
+        writeInput(attachedSession, msg.data);
         break;
       }
 
       case "resize": {
         if (!attachedSession) return;
-        await resizeWindow(attachedSession, msg.cols, msg.rows);
+        resizeSession(attachedSession, msg.cols, msg.rows);
         break;
       }
 
       case "detach": {
         if (attachedSession) {
-          removeClient(attachedSession, ws);
+          detachClient(attachedSession, ws);
           attachedSession = null;
         }
         break;
@@ -63,7 +61,7 @@ export function handleConnection(ws: WebSocket) {
 
   ws.on("close", () => {
     if (attachedSession) {
-      removeClient(attachedSession, ws);
+      detachClient(attachedSession, ws);
     }
   });
 }
