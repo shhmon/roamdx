@@ -10,12 +10,11 @@ export async function claudeRoutes(app: FastifyInstance) {
         return reply.status(400).send({ error: "prompt is required" });
       }
 
-      const sessionName = "claude";
-      if (!(await hasSession(sessionName))) {
-        await createSession(sessionName);
-      }
+      const sessionName = `claude-${Date.now().toString(36)}`;
+      await createSession(sessionName);
 
-      await sendKeys(sessionName, prompt);
+      const escaped = prompt.replace(/'/g, "'\\''");
+      await sendKeys(sessionName, `claude '${escaped}'`);
       await sendSpecialKey(sessionName, "Enter");
 
       return { status: "sent", sessionId: sessionName };
