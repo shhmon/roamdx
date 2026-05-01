@@ -274,7 +274,7 @@ button:disabled {
 
 #home-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 12px;
   width: 100%;
 }
@@ -287,7 +287,6 @@ button:disabled {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  justify-content: space-between;
   gap: 8px;
   cursor: pointer;
   font-size: 12px;
@@ -296,19 +295,48 @@ button:disabled {
   padding: 12px;
   word-break: break-all;
   overflow: hidden;
+  position: relative;
+}
+
+.home-tile .tile-close {
+  all: unset;
+  cursor: pointer;
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  z-index: 1;
+  cursor: pointer;
+  opacity: 0;
+  font-size: 20px;
+  line-height: 1;
+  color: var(--accent);
+  transition: opacity 0.1s;
+}
+
+.home-tile:hover .tile-close {
+  opacity: 0.2;
+}
+
+.home-tile .tile-close:hover {
+  opacity: 0.8;
 }
 
 .home-tile .tile-preview {
-  width: 100%;
-  flex: 1;
+  width: 48px;
+  height: 48px;
   border-radius: 4px;
   image-rendering: pixelated;
   opacity: 0.85;
+  flex-shrink: 0;
 }
 
 .home-tile .tile-name {
   font-size: 13px;
   font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  width: 100%;
 }
 
 .home-tile .tile-meta {
@@ -317,6 +345,7 @@ button:disabled {
   display: flex;
   flex-direction: column;
   gap: 2px;
+  margin-top: auto;
 }
 
 .home-tile:hover {

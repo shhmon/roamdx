@@ -24,7 +24,7 @@ const Api = {
   async deleteSession(name) {
     await fetch(`/api/sessions/${encodeURIComponent(name)}`, {
       method: "DELETE",
-      headers: this.headers(),
+      headers: { Authorization: `Bearer ${Auth.getToken()}` },
     });
   },
 

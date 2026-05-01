@@ -60,9 +60,7 @@ const App = {
 
       const canvas = document.createElement("canvas");
       canvas.className = "tile-preview";
-      canvas.width = s.cols;
-      canvas.height = s.rows;
-      Preview.render(s.name, canvas, s.cols, s.rows);
+      Preview.render(s.name, canvas);
 
       const meta = document.createElement("div");
       meta.className = "tile-meta";
@@ -70,6 +68,15 @@ const App = {
       const ago = this.timeAgo(created);
       meta.innerHTML = `<span>${s.cols}x${s.rows}</span><span>${ago}</span>`;
 
+      const close = document.createElement("button");
+      close.className = "tile-close";
+      close.textContent = "\u00d7";
+      close.addEventListener("click", (e) => {
+        e.stopPropagation();
+        this.deleteSession(s.name);
+      });
+
+      tile.appendChild(close);
       tile.appendChild(name);
       tile.appendChild(canvas);
       tile.appendChild(meta);
