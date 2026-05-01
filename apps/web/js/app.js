@@ -25,8 +25,13 @@ const App = {
       }
     });
 
-    document.getElementById("fullscreen-btn").addEventListener("click", () => this.enterFullscreen());
-    document.getElementById("exit-fullscreen").addEventListener("click", () => this.exitFullscreen());
+    document.getElementById("fullscreen-btn").addEventListener("click", () => {
+      if (document.getElementById("app").classList.contains("fullscreen")) {
+        this.exitFullscreen();
+      } else {
+        this.enterFullscreen();
+      }
+    });
 
     this.showHome();
 
@@ -34,10 +39,11 @@ const App = {
     this.pollTimer = setInterval(() => this.refreshSessions(), 5000);
   },
 
-  showHome() {
+  async showHome() {
     document.getElementById("home-view").classList.remove("hidden");
     document.getElementById("terminal-container").style.display = "none";
-    this.refreshSessions();
+    await this.refreshSessions();
+    this.renderHomeGrid();
   },
 
   showTerminal() {
@@ -154,9 +160,6 @@ const App = {
     }
 
     document.getElementById("home-count").textContent = `${sessions.length} total`;
-    if (!document.getElementById("home-view").classList.contains("hidden")) {
-      this.renderHomeGrid();
-    }
   },
 
   setActiveSession(name) {

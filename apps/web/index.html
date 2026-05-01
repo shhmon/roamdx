@@ -14,16 +14,7 @@
         <span class="logo" id="logo" style="cursor:pointer">roamdx</span>
         <span id="status-dot" class="dot"></span>
       </div>
-      <div class="topbar-right">
-        <button id="fullscreen-btn" class="icon-btn" title="Fullscreen">
-          <svg class="icon-expand" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/>
-          </svg>
-          <svg class="icon-shrink" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none">
-            <polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/><line x1="14" y1="10" x2="21" y2="3"/><line x1="3" y1="21" x2="10" y2="14"/>
-          </svg>
-        </button>
-      </div>
+      <div class="topbar-right"></div>
     </header>
 
     <div id="main-layout">
@@ -53,14 +44,14 @@
           <div id="home-grid"></div>
         </div>
       </div>
-      <main id="terminal-container"></main>
+      <main id="terminal-container">
+        <button id="fullscreen-btn" class="fullscreen-toggle icon-btn" title="Fullscreen">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/>
+          </svg>
+        </button>
+      </main>
     </div>
-
-    <button id="exit-fullscreen" class="icon-btn" title="Exit fullscreen">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/><line x1="14" y1="10" x2="21" y2="3"/><line x1="3" y1="21" x2="10" y2="14"/>
-      </svg>
-    </button>
   </div>
 
   <div id="auth-overlay">

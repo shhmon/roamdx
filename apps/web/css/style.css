@@ -439,6 +439,25 @@ button:disabled {
   text-align: center;
 }
 
+/* ── Fullscreen toggle ── */
+
+.fullscreen-toggle {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 10;
+  opacity: 0.15;
+  transition: opacity 0.15s;
+}
+
+.fullscreen-toggle:hover {
+  opacity: 0.6;
+}
+
+#terminal-container {
+  position: relative;
+}
+
 /* ── Fullscreen mode ── */
 
 #app.fullscreen #topbar,
@@ -446,23 +465,12 @@ button:disabled {
   display: none;
 }
 
-/* Exit-fullscreen button — fixed top-right, visible on hover */
-#exit-fullscreen {
-  position: fixed;
-  top: 8px;
-  right: 8px;
-  z-index: 50;
+#app.fullscreen .fullscreen-toggle {
   opacity: 0;
-  transition: opacity 0.2s;
-  pointer-events: none;
 }
 
-#app.fullscreen #exit-fullscreen {
-  pointer-events: auto;
-}
-
-#app.fullscreen #exit-fullscreen:hover {
-  opacity: 1;
+#app.fullscreen .fullscreen-toggle:hover {
+  opacity: 0.6;
 }
 
 /* ── Mobile ── */
