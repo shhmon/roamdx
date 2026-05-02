@@ -56,9 +56,10 @@ await app.register(fastifyStatic, {
   prefix: "/",
 });
 
-// SPA fallback — serve index.html for non-API, non-file routes
+// SPA fallback — serve index.html for page routes (no extension, not API/WS)
 app.setNotFoundHandler(async (req, reply) => {
-  if (req.url.startsWith("/api/") || req.url.startsWith("/ws")) {
+  const url = req.url.split("?")[0];
+  if (url.startsWith("/api/") || url.startsWith("/ws") || url.includes(".")) {
     return reply.status(404).send({ error: "Not found" });
   }
   return reply.sendFile("index.html");

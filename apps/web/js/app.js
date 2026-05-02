@@ -64,7 +64,17 @@ const App = {
     this.updateSessions(this.sessions);
   },
 
-  showSession(name) {
+  async showSession(name) {
+    const exists = this.sessions.find((s) => s.name === name);
+    if (!exists) {
+      await this.refreshSessions();
+      const stillExists = this.sessions.find((s) => s.name === name);
+      if (!stillExists) {
+        this.navigate("/");
+        return;
+      }
+    }
+
     document.getElementById("home-view").classList.add("hidden");
     document.getElementById("terminal-container").classList.remove("hidden");
 
