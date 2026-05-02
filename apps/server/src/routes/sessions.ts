@@ -1,9 +1,10 @@
 import type { FastifyInstance } from "fastify";
-import { listSessions, createSession, killSession, capturePane } from "../tmux/bridge.js";
+import { listSessions, createSession, killSession, renameSession, capturePane } from "../tmux/bridge.js";
 
 export async function sessionRoutes(app: FastifyInstance) {
   app.get("/api/sessions", async () => {
     const sessions = await listSessions();
+    sessions.sort((a, b) => parseInt(b.created) - parseInt(a.created));
     return { sessions };
   });
 
@@ -13,6 +14,22 @@ export async function sessionRoutes(app: FastifyInstance) {
       try {
         const content = await capturePane(req.params.name);
         return { content };
+      } catch {
+        return reply.status(404).send({ error: "Session not found" });
+      }
+    }
+  );
+
+  app.post<{ Params: { name: string }; Body: { name: string } }>(
+    "/api/sessions/:name/rename",
+    async (req, reply) => {
+      const newName = req.body.name;
+      if (!newName || typeof newName !== "string") {
+        return reply.status(400).send({ error: "name is required" });
+      }
+      try {
+        await renameSession(req.params.name, newName);
+        return { ok: true };
       } catch {
         return reply.status(404).send({ error: "Session not found" });
       }

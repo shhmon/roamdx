@@ -21,6 +21,14 @@ const Api = {
     });
   },
 
+  async renameSession(oldName, newName) {
+    await fetch(`/api/sessions/${encodeURIComponent(oldName)}/rename`, {
+      method: "POST",
+      headers: this.headers(),
+      body: JSON.stringify({ name: newName }),
+    });
+  },
+
   async deleteSession(name) {
     await fetch(`/api/sessions/${encodeURIComponent(name)}`, {
       method: "DELETE",

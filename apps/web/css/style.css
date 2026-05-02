@@ -337,6 +337,21 @@ button:disabled {
   text-overflow: ellipsis;
   white-space: nowrap;
   width: 100%;
+  cursor: text;
+  border-bottom: 1px solid transparent;
+}
+
+.tile-rename {
+  font-size: 13px;
+  font-weight: 600;
+  width: 100%;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--accent);
+  border-radius: 0;
+  color: var(--text);
+  outline: none;
 }
 
 .home-tile .tile-meta {
@@ -351,6 +366,15 @@ button:disabled {
 .home-tile:hover {
   background: rgba(117,176,247,0.08);
   border-color: var(--accent);
+}
+
+.home-tile:has(.tile-rename) {
+  border-color: var(--border);
+  background: var(--surface);
+}
+
+.home-tile:has(.tile-rename) .tile-close {
+  display: none;
 }
 
 .home-tile-new {

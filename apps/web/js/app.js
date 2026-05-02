@@ -107,6 +107,30 @@ const App = {
       const name = document.createElement("span");
       name.className = "tile-name";
       name.textContent = s.name;
+      name.addEventListener("dblclick", (e) => {
+        e.stopPropagation();
+        const input = document.createElement("input");
+        input.className = "tile-rename";
+        input.value = s.name;
+        name.replaceWith(input);
+        input.focus();
+        input.select();
+        const commit = async () => {
+          const newName = input.value.trim();
+          if (newName && newName !== s.name) {
+            await Api.renameSession(s.name, newName);
+            await this.refreshSessions();
+            this.renderHomeGrid();
+          } else {
+            input.replaceWith(name);
+          }
+        };
+        input.addEventListener("blur", commit);
+        input.addEventListener("keydown", (ev) => {
+          if (ev.key === "Enter") { ev.preventDefault(); input.blur(); }
+          if (ev.key === "Escape") { input.removeEventListener("blur", commit); input.replaceWith(name); }
+        });
+      });
 
       const canvas = document.createElement("canvas");
       canvas.className = "tile-preview";
@@ -121,7 +145,10 @@ const App = {
       tile.appendChild(name);
       tile.appendChild(canvas);
       tile.appendChild(meta);
-      tile.addEventListener("click", () => this.navigate(`/session/${encodeURIComponent(s.name)}`));
+      tile.addEventListener("click", (e) => {
+        if (e.target === name) return;
+        this.navigate(`/session/${encodeURIComponent(s.name)}`);
+      });
       grid.appendChild(tile);
     }
 

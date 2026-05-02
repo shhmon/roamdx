@@ -19,7 +19,7 @@ export async function listSessions(): Promise<TmuxSession[]> {
     const out = await tmux(
       "list-sessions",
       "-F",
-      "#{session_name}|#{session_created}|#{window_width}|#{window_height}|#{session_attached}"
+      "#{session_name}|#{session_activity}|#{window_width}|#{window_height}|#{session_attached}"
     );
     return out
       .trim()
@@ -47,6 +47,10 @@ export async function createSession(
 ): Promise<void> {
   const safe = sanitizeName(name);
   await tmux("new-session", "-d", "-s", safe, "-x", String(cols), "-y", String(rows));
+}
+
+export async function renameSession(oldName: string, newName: string): Promise<void> {
+  await tmux("rename-session", "-t", sanitizeName(oldName), sanitizeName(newName));
 }
 
 export async function killSession(name: string): Promise<void> {
