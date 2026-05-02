@@ -30,5 +30,7 @@ const ClaudePanel = {
         submit();
       }
     });
+
+    Voice.init();
   },
 };

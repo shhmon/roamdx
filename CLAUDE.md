@@ -21,3 +21,7 @@ If a notebook or script fails due to a missing field or schema change, think abo
 ### Use tables for structured data
 
 When presenting comparisons, agent overviews, config summaries, or any structured information, use markdown tables. Tables are easier to scan than prose.
+
+### Don't fumble
+
+When debugging an issue you don't understand, stop and ask for information (console output, error messages, what exactly happens) instead of making multiple blind guesses in a row. Diagnose first, then act.

@@ -231,6 +231,31 @@ button:disabled {
   background: rgba(255,255,255,0.05);
 }
 
+.claude-actions {
+  display: flex;
+  gap: 4px;
+}
+
+.claude-actions .btn-primary {
+  flex: 1;
+}
+
+.mic-btn {
+  padding: 6px;
+  border: 1px solid var(--border);
+}
+
+.mic-btn.recording {
+  color: var(--danger);
+  border-color: var(--danger);
+  animation: pulse 1.5s ease infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
 /* ── Home view ── */
 
 #home-view {
@@ -555,12 +580,15 @@ button:disabled {
     padding: 6px 8px;
     background: var(--surface);
     border-top: 1px solid var(--border);
-    overflow-x: auto;
     position: fixed;
     bottom: 0;
     left: 0;
     right: 0;
     z-index: 20;
+  }
+
+  .keys-spacer {
+    flex: 1;
   }
 
   #mobile-keys button {
@@ -575,10 +603,23 @@ button:disabled {
     -webkit-tap-highlight-color: transparent;
   }
 
+  #mobile-keys .mic-btn {
+    padding: 8px;
+    display: flex;
+    align-items: center;
+  }
+
   #mobile-keys button.active {
     background: var(--accent);
     color: var(--bg);
     border-color: var(--accent);
+  }
+
+  #mobile-keys .mic-btn.recording {
+    background: var(--danger);
+    color: var(--bg);
+    border-color: var(--danger);
+    animation: pulse 1.5s ease infinite;
   }
 
   #mobile-keys button:active {
