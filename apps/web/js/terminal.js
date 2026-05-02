@@ -66,36 +66,43 @@ const TerminalManager = {
     window.addEventListener("resize", updateHeight);
     updateHeight();
 
-    // Scroll zone — right edge sends scroll to tmux with inertia
+    // Scroll zone — iOS-style kinetic scrolling for tmux
     const scrollZone = document.getElementById("scroll-zone");
     if (scrollZone) {
       let lastY = null;
       let lastTime = 0;
       let velocity = 0;
       let accum = 0;
+      let amplitude = 0;
+      let target = 0;
+      let position = 0;
+      let timestamp = 0;
       let inertiaFrame = null;
-      const THRESHOLD = 44;
-      const FRICTION = 0.9;
-      const MIN_VELOCITY = 0.3;
+      const TIME_CONSTANT = 325; // ms — matches iOS
+      const LINE_HEIGHT = 20; // px per terminal line
 
       const sendScroll = (up) => {
         const btn = up ? 97 : 96;
         this.send({ type: "input", data: `\x1b[M${String.fromCharCode(btn)}\x21\x21` });
       };
 
-      const inertia = () => {
-        const dynamicFriction = Math.min(0.96, FRICTION + Math.abs(velocity) * 0.002);
-        velocity *= dynamicFriction;
-        if (Math.abs(velocity) < MIN_VELOCITY) return;
-        // Scale how much we advance per frame by velocity — fast = more lines per tick
-        accum += velocity;
-        let sent = 0;
-        while (Math.abs(accum) >= THRESHOLD && sent < 6) {
+      const flushLines = () => {
+        while (Math.abs(accum) >= LINE_HEIGHT) {
           sendScroll(accum > 0);
-          accum -= accum > 0 ? THRESHOLD : -THRESHOLD;
-          sent++;
+          accum -= accum > 0 ? LINE_HEIGHT : -LINE_HEIGHT;
         }
-        inertiaFrame = requestAnimationFrame(inertia);
+      };
+
+      const inertia = () => {
+        const elapsed = Date.now() - timestamp;
+        const delta = -amplitude * Math.exp(-elapsed / TIME_CONSTANT);
+        if (Math.abs(delta) > 0.5) {
+          const newPos = target + delta;
+          accum += newPos - position;
+          position = newPos;
+          flushLines();
+          inertiaFrame = requestAnimationFrame(inertia);
+        }
       };
 
       scrollZone.addEventListener("touchstart", (e) => {
@@ -104,6 +111,7 @@ const TerminalManager = {
         lastTime = Date.now();
         velocity = 0;
         accum = 0;
+        position = 0;
         e.preventDefault();
       });
 
@@ -113,20 +121,20 @@ const TerminalManager = {
         const now = Date.now();
         const dy = lastY - e.touches[0].clientY;
         const dt = Math.max(now - lastTime, 1);
-        velocity = dy / dt * 32;
+        velocity = 0.8 * velocity + 0.2 * (dy / dt * 1000); // smoothed velocity in px/s
         lastY = e.touches[0].clientY;
         lastTime = now;
         accum += dy;
-        while (Math.abs(accum) >= THRESHOLD) {
-          sendScroll(accum > 0);
-          accum -= accum > 0 ? THRESHOLD : -THRESHOLD;
-        }
+        position += dy;
+        flushLines();
       });
 
       scrollZone.addEventListener("touchend", () => {
         lastY = null;
-        // Run first inertia tick immediately, no delay
-        inertia();
+        amplitude = 0.8 * velocity / 1000 * TIME_CONSTANT; // projected distance
+        target = Math.round(position + amplitude);
+        timestamp = Date.now();
+        inertiaFrame = requestAnimationFrame(inertia);
       });
     }
 
