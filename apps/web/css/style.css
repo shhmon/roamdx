@@ -440,9 +440,11 @@ button:disabled {
 #content-area {
   flex: 1;
   min-width: 0;
+  min-height: 0;
   position: relative;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
 /* ── Terminal ── */
@@ -450,6 +452,7 @@ button:disabled {
 #terminal-container {
   flex: 1;
   min-width: 0;
+  min-height: 0;
   overflow: hidden;
   background: var(--bg);
 }
@@ -564,6 +567,54 @@ button:disabled {
 
 #mobile-keys {
   display: none;
+  gap: 4px;
+  padding: 6px 8px;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+#mobile-keys.visible {
+  display: flex;
+}
+
+.keys-spacer {
+  flex: 1;
+}
+
+#mobile-keys button {
+  background: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 8px 12px;
+  font-family: var(--font);
+  font-size: 12px;
+  flex-shrink: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+#mobile-keys .mic-btn {
+  padding: 8px;
+  display: flex;
+  align-items: center;
+}
+
+#mobile-keys button.active {
+  background: var(--accent);
+  color: var(--bg);
+  border-color: var(--accent);
+}
+
+#mobile-keys .mic-btn.recording {
+  background: var(--danger);
+  color: var(--bg);
+  border-color: var(--danger);
+  animation: pulse 1.5s ease infinite;
+}
+
+#mobile-keys button:active {
+  opacity: 0.7;
 }
 
 /* ── Mobile ── */
@@ -596,55 +647,4 @@ button:disabled {
     height: 18px;
   }
 
-  #mobile-keys {
-    display: flex;
-    gap: 4px;
-    padding: 6px 8px;
-    background: var(--surface);
-    border-top: 1px solid var(--border);
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    z-index: 20;
-  }
-
-  .keys-spacer {
-    flex: 1;
-  }
-
-  #mobile-keys button {
-    background: var(--bg);
-    color: var(--text);
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    padding: 8px 12px;
-    font-family: var(--font);
-    font-size: 12px;
-    flex-shrink: 0;
-    -webkit-tap-highlight-color: transparent;
-  }
-
-  #mobile-keys .mic-btn {
-    padding: 8px;
-    display: flex;
-    align-items: center;
-  }
-
-  #mobile-keys button.active {
-    background: var(--accent);
-    color: var(--bg);
-    border-color: var(--accent);
-  }
-
-  #mobile-keys .mic-btn.recording {
-    background: var(--danger);
-    color: var(--bg);
-    border-color: var(--danger);
-    animation: pulse 1.5s ease infinite;
-  }
-
-  #mobile-keys button:active {
-    opacity: 0.7;
-  }
 }

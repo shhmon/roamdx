@@ -19,6 +19,11 @@ const App = {
     document.getElementById("logo").addEventListener("click", () => this.navigate("/"));
     document.getElementById("back-btn").addEventListener("click", () => this.navigate("/"));
 
+    document.getElementById("keys-btn").addEventListener("click", () => {
+      document.getElementById("mobile-keys").classList.toggle("visible");
+      setTimeout(() => TerminalManager.fitAddon.fit(), 50);
+    });
+
     document.getElementById("fullscreen-btn").addEventListener("click", () => {
       const app = document.getElementById("app");
       app.classList.toggle("fullscreen");
