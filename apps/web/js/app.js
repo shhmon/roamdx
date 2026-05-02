@@ -150,7 +150,8 @@ const App = {
       const meta = document.createElement("div");
       meta.className = "tile-meta";
       const created = new Date(parseInt(s.created) * 1000);
-      meta.innerHTML = `<span>${s.cols}x${s.rows}</span><span>${this.timeAgo(created)}</span>`;
+      const shortPath = s.path ? s.path.replace(/^\/Users\/[^/]+/, "~") : "";
+      meta.innerHTML = `<span>${s.command || "zsh"}${shortPath ? " · " + shortPath : ""}</span><span>${this.timeAgo(created)}</span>`;
 
       tile.appendChild(close);
       tile.appendChild(name);

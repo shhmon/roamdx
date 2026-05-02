@@ -434,6 +434,7 @@ button:disabled {
   image-rendering: pixelated;
   opacity: 0.85;
   flex-shrink: 0;
+  margin: auto 0;
 }
 
 .home-tile .tile-name {

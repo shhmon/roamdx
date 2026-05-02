@@ -19,20 +19,22 @@ export async function listSessions(): Promise<TmuxSession[]> {
     const out = await tmux(
       "list-sessions",
       "-F",
-      "#{session_name}|#{session_activity}|#{window_width}|#{window_height}|#{session_attached}"
+      "#{session_name}|#{session_activity}|#{window_width}|#{window_height}|#{session_attached}|#{pane_current_command}|#{pane_current_path}"
     );
     return out
       .trim()
       .split("\n")
       .filter(Boolean)
       .map((line) => {
-        const [name, created, cols, rows, attached] = line.split("|");
+        const [name, created, cols, rows, attached, command, path] = line.split("|");
         return {
           name,
           created,
           cols: parseInt(cols, 10),
           rows: parseInt(rows, 10),
           attached: parseInt(attached, 10),
+          command: command || "",
+          path: path || "",
         };
       });
   } catch {

@@ -4,4 +4,6 @@ export interface TmuxSession {
   attached: number;
   cols: number;
   rows: number;
+  command: string;
+  path: string;
 }
