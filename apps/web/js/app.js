@@ -66,6 +66,8 @@ const App = {
     document.getElementById("home-view").classList.remove("hidden");
     document.getElementById("terminal-container").classList.add("hidden");
     document.getElementById("back-btn").classList.add("hidden");
+    document.getElementById("keys-btn").classList.add("hidden");
+    document.getElementById("mobile-keys").classList.remove("visible");
     await this.refreshSessions();
     this.renderHomeGrid();
     this.updateSessions(this.sessions);
@@ -85,6 +87,7 @@ const App = {
     document.getElementById("home-view").classList.add("hidden");
     document.getElementById("terminal-container").classList.remove("hidden");
     document.getElementById("back-btn").classList.remove("hidden");
+    document.getElementById("keys-btn").classList.remove("hidden");
 
     if (this.activeSession !== name) {
       this.activeSession = name;
