@@ -63,6 +63,33 @@ const TerminalManager = {
       });
     }
 
+    // Scroll zone — right edge touch area sends scroll to tmux
+    const scrollZone = document.getElementById("scroll-zone");
+    if (scrollZone) {
+      let lastY = null;
+      scrollZone.addEventListener("touchstart", (e) => {
+        lastY = e.touches[0].clientY;
+        e.preventDefault();
+      });
+      scrollZone.addEventListener("touchmove", (e) => {
+        if (lastY === null) return;
+        e.preventDefault();
+        const dy = lastY - e.touches[0].clientY;
+        const threshold = 15;
+        if (Math.abs(dy) >= threshold) {
+          const up = dy < 0;
+          const lines = Math.floor(Math.abs(dy) / threshold);
+          for (let i = 0; i < lines; i++) {
+            // tmux mouse wheel: up=\x1b[M`!!, down=\x1b[Ma!!
+            const btn = up ? 96 : 97;
+            this.send({ type: "input", data: `\x1b[M${String.fromCharCode(btn)}\x21\x21` });
+          }
+          lastY = e.touches[0].clientY;
+        }
+      });
+      scrollZone.addEventListener("touchend", () => { lastY = null; });
+    }
+
     this.term.onData((data) => {
       if (this.ctrlActive) {
         // Convert to control character
@@ -89,18 +116,6 @@ const TerminalManager = {
     const bar = document.getElementById("mobile-keys");
     if (!bar) return;
 
-    // Keep bar above virtual keyboard
-    if (window.visualViewport) {
-      const reposition = () => {
-        const vv = window.visualViewport;
-        bar.style.position = "fixed";
-        bar.style.bottom = "auto";
-        bar.style.top = `${vv.offsetTop + vv.height - bar.offsetHeight}px`;
-      };
-      window.visualViewport.addEventListener("resize", reposition);
-      window.visualViewport.addEventListener("scroll", reposition);
-    }
-
     bar.addEventListener("click", (e) => {
       const btn = e.target.closest("button");
       if (!btn) return;
@@ -117,11 +132,20 @@ const TerminalManager = {
         return;
       }
 
+      // If recording and Enter pressed, stop recording (onend will send transcript + Enter)
+      if (Voice.isRecording && btn.dataset.key === "\\x0d") {
+        Voice.sendEnterOnStop = true;
+        Voice.stop();
+        return;
+      }
+
       const raw = btn.dataset.key;
       if (raw) {
         const key = raw.replace(/\\x([0-9a-fA-F]{2})/g, (_, h) => String.fromCharCode(parseInt(h, 16)));
         this.send({ type: "input", data: key });
-        this.term.focus();
+        // Only refocus if virtual keyboard is already up
+        const kbOpen = window.visualViewport && window.visualViewport.height < window.innerHeight * 0.85;
+        if (kbOpen) this.term.focus();
       }
     });
 

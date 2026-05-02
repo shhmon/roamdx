@@ -548,6 +548,23 @@ button:disabled {
 /* Hide back button on home view */
 #back-btn.hidden, #keys-btn.hidden { display: none; }
 
+#scroll-zone {
+  display: none;
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 36px;
+  height: 100%;
+  z-index: 5;
+  touch-action: none;
+}
+
+@media (pointer: coarse) {
+  #scroll-zone {
+    display: block;
+  }
+}
+
 /* ── Fullscreen mode ── */
 
 #app.fullscreen #topbar,
@@ -572,6 +589,9 @@ button:disabled {
   background: var(--surface);
   border-top: 1px solid var(--border);
   flex-shrink: 0;
+  z-index: 10;
+  position: relative;
+  width: 100%;
 }
 
 #mobile-keys.visible {
@@ -590,7 +610,8 @@ button:disabled {
   padding: 8px 12px;
   font-family: var(--font);
   font-size: 12px;
-  flex-shrink: 0;
+  flex-shrink: 1;
+  min-width: 0;
   -webkit-tap-highlight-color: transparent;
 }
 

@@ -3,6 +3,7 @@ const Voice = {
   isRecording: false,
   buttons: [],
   transcript: "",
+  sendEnterOnStop: false,
 
   init() {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -38,7 +39,12 @@ const Voice = {
       this.isRecording = false;
       this.setButtons(false);
       if (wasRecording && this.transcript.trim()) {
-        TerminalManager.send({ type: "input", data: this.transcript.trim() });
+        const text = this.transcript.trim();
+        const enter = this.sendEnterOnStop ? "\r" : "";
+        this.sendEnterOnStop = false;
+        TerminalManager.send({ type: "input", data: text + enter });
+      } else {
+        this.sendEnterOnStop = false;
       }
     };
 
