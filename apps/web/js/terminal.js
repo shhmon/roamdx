@@ -66,31 +66,63 @@ const TerminalManager = {
     window.addEventListener("resize", updateHeight);
     updateHeight();
 
-    // Scroll zone — right edge touch area sends scroll to tmux
+    // Scroll zone — right edge sends scroll to tmux with inertia
     const scrollZone = document.getElementById("scroll-zone");
     if (scrollZone) {
       let lastY = null;
+      let lastTime = 0;
+      let velocity = 0;
+      let accum = 0;
+      let inertiaFrame = null;
+      const THRESHOLD = 32;
+      const FRICTION = 0.82;
+      const MIN_VELOCITY = 0.5;
+
+      const sendScroll = (up) => {
+        const btn = up ? 97 : 96;
+        this.send({ type: "input", data: `\x1b[M${String.fromCharCode(btn)}\x21\x21` });
+      };
+
+      const inertia = () => {
+        velocity *= FRICTION;
+        if (Math.abs(velocity) < MIN_VELOCITY) return;
+        accum += velocity;
+        while (Math.abs(accum) >= THRESHOLD) {
+          sendScroll(accum > 0);
+          accum -= accum > 0 ? THRESHOLD : -THRESHOLD;
+        }
+        inertiaFrame = requestAnimationFrame(inertia);
+      };
+
       scrollZone.addEventListener("touchstart", (e) => {
+        if (inertiaFrame) cancelAnimationFrame(inertiaFrame);
         lastY = e.touches[0].clientY;
+        lastTime = Date.now();
+        velocity = 0;
+        accum = 0;
         e.preventDefault();
       });
+
       scrollZone.addEventListener("touchmove", (e) => {
         if (lastY === null) return;
         e.preventDefault();
+        const now = Date.now();
         const dy = lastY - e.touches[0].clientY;
-        const threshold = 15;
-        if (Math.abs(dy) >= threshold) {
-          const up = dy < 0;
-          const lines = Math.floor(Math.abs(dy) / threshold);
-          for (let i = 0; i < lines; i++) {
-            // tmux mouse wheel: up=\x1b[M`!!, down=\x1b[Ma!!
-            const btn = up ? 96 : 97;
-            this.send({ type: "input", data: `\x1b[M${String.fromCharCode(btn)}\x21\x21` });
-          }
-          lastY = e.touches[0].clientY;
+        const dt = Math.max(now - lastTime, 1);
+        velocity = dy / dt * 16; // normalize to ~frame rate
+        lastY = e.touches[0].clientY;
+        lastTime = now;
+        accum += dy;
+        while (Math.abs(accum) >= THRESHOLD) {
+          sendScroll(accum > 0);
+          accum -= accum > 0 ? THRESHOLD : -THRESHOLD;
         }
       });
-      scrollZone.addEventListener("touchend", () => { lastY = null; });
+
+      scrollZone.addEventListener("touchend", () => {
+        lastY = null;
+        inertiaFrame = requestAnimationFrame(inertia);
+      });
     }
 
     this.term.onData((data) => {
