@@ -1,3 +1,24 @@
+@font-face {
+  font-family: "JetBrainsMono Nerd Font Mono";
+  src: url("/fonts/JetBrainsMonoNerdFontMono-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "JetBrainsMono Nerd Font Mono";
+  src: url("/fonts/JetBrainsMonoNerdFontMono-Medium.ttf") format("truetype");
+  font-weight: 500;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "JetBrainsMono Nerd Font Mono";
+  src: url("/fonts/JetBrainsMonoNerdFontMono-Bold.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+}
+
 *, *::before, *::after {
   margin: 0;
   padding: 0;
@@ -439,6 +460,7 @@ button:disabled {
 
 #terminal-container .xterm {
   padding: 10px 14px 0;
+  font-variant-emoji: text;
 }
 
 #terminal-container .xterm-viewport {
