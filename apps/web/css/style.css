@@ -546,7 +546,7 @@ button:disabled {
 .content-toggle-left { top: 32px; }
 
 /* Hide back button on home view */
-#back-btn.hidden { display: none; }
+#back-btn.hidden, #keys-btn.hidden { display: none; }
 
 /* ── Fullscreen mode ── */
 
