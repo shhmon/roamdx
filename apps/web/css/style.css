@@ -241,7 +241,7 @@ button:disabled {
 .icon-btn {
   background: none;
   color: var(--text-dim);
-  padding: 4px;
+  padding: 6px;
   display: flex;
   align-items: center;
   border-radius: var(--radius);
@@ -287,6 +287,7 @@ button:disabled {
   justify-content: center;
   background: var(--bg);
   padding: 32px;
+  overflow-y: auto;
 }
 
 #home-content {
@@ -541,9 +542,10 @@ button:disabled {
   opacity: 1;
 }
 
-.content-toggle { right: 8px; }
-.content-toggle-right { top: 8px; }
-.content-toggle-left { top: 32px; }
+.content-toggle { right: 10px; }
+.content-toggle-right { top: 10px; }
+.content-toggle-left { left: 10px; right: auto; top: 10px; }
+#keys-btn { right: 10px; top: 36px; }
 
 /* Hide back button on home view */
 #back-btn.hidden, #keys-btn.hidden { display: none; }
@@ -586,12 +588,10 @@ button:disabled {
   display: none;
   gap: 4px;
   padding: 6px 8px;
+  margin-top: 4px;
   background: var(--surface);
   border-top: 1px solid var(--border);
   flex-shrink: 0;
-  z-index: 10;
-  position: relative;
-  width: 100%;
 }
 
 #mobile-keys.visible {
