@@ -522,7 +522,7 @@ button:disabled {
 }
 
 #terminal-container .xterm {
-  padding: 10px 14px 0;
+  padding: 10px 14px 1px;
   font-variant-emoji: text;
 }
 
