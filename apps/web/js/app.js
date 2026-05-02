@@ -17,6 +17,7 @@ const App = {
     });
 
     document.getElementById("logo").addEventListener("click", () => this.navigate("/"));
+    document.getElementById("back-btn").addEventListener("click", () => this.navigate("/"));
 
     document.getElementById("fullscreen-btn").addEventListener("click", () => {
       const app = document.getElementById("app");
@@ -59,6 +60,7 @@ const App = {
     }
     document.getElementById("home-view").classList.remove("hidden");
     document.getElementById("terminal-container").classList.add("hidden");
+    document.getElementById("back-btn").classList.add("hidden");
     await this.refreshSessions();
     this.renderHomeGrid();
     this.updateSessions(this.sessions);
@@ -77,6 +79,7 @@ const App = {
 
     document.getElementById("home-view").classList.add("hidden");
     document.getElementById("terminal-container").classList.remove("hidden");
+    document.getElementById("back-btn").classList.remove("hidden");
 
     if (this.activeSession !== name) {
       this.activeSession = name;
