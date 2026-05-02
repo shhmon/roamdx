@@ -87,10 +87,13 @@ const TerminalManager = {
         const dynamicFriction = Math.min(0.96, FRICTION + Math.abs(velocity) * 0.002);
         velocity *= dynamicFriction;
         if (Math.abs(velocity) < MIN_VELOCITY) return;
+        // Scale how much we advance per frame by velocity — fast = more lines per tick
         accum += velocity;
-        while (Math.abs(accum) >= THRESHOLD) {
+        let sent = 0;
+        while (Math.abs(accum) >= THRESHOLD && sent < 6) {
           sendScroll(accum > 0);
           accum -= accum > 0 ? THRESHOLD : -THRESHOLD;
+          sent++;
         }
         inertiaFrame = requestAnimationFrame(inertia);
       };
@@ -110,7 +113,7 @@ const TerminalManager = {
         const now = Date.now();
         const dy = lastY - e.touches[0].clientY;
         const dt = Math.max(now - lastTime, 1);
-        velocity = dy / dt * 24;
+        velocity = dy / dt * 32;
         lastY = e.touches[0].clientY;
         lastTime = now;
         accum += dy;
