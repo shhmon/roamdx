@@ -54,14 +54,17 @@ const TerminalManager = {
       this.sendResize();
     }).observe(container);
 
+    const updateHeight = () => {
+      const h = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+      document.documentElement.style.setProperty("--isl-vh", h * 0.01 + "px");
+      this.fitAddon.fit();
+      this.sendResize();
+    };
     if (window.visualViewport) {
-      const app = document.getElementById("app");
-      window.visualViewport.addEventListener("resize", () => {
-        app.style.height = `${window.visualViewport.height}px`;
-        this.fitAddon.fit();
-        this.sendResize();
-      });
+      window.visualViewport.addEventListener("resize", updateHeight);
     }
+    window.addEventListener("resize", updateHeight);
+    updateHeight();
 
     // Scroll zone — right edge touch area sends scroll to tmux
     const scrollZone = document.getElementById("scroll-zone");
