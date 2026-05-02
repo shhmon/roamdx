@@ -16,41 +16,67 @@ const App = {
       if (e.key === "Enter") this.createSession();
     });
 
-    document.getElementById("logo").addEventListener("click", () => {
-      if (this.activeSession) {
-        TerminalManager.detach();
-        this.activeSession = null;
-        this.showHome();
-        this.updateSessions(this.sessions);
-      }
-    });
+    document.getElementById("logo").addEventListener("click", () => this.navigate("/"));
 
     document.getElementById("fullscreen-btn").addEventListener("click", () => {
-      if (document.getElementById("app").classList.contains("fullscreen")) {
-        this.exitFullscreen();
-      } else {
-        this.enterFullscreen();
+      const app = document.getElementById("app");
+      app.classList.toggle("fullscreen");
+      setTimeout(() => TerminalManager.fitAddon.fit(), 50);
+      if (!app.classList.contains("fullscreen") && this.activeSession) {
+        TerminalManager.term.focus();
       }
     });
 
-    this.showHome();
+    window.addEventListener("popstate", () => this.route());
 
     await this.refreshSessions();
+    this.route();
     this.pollTimer = setInterval(() => this.refreshSessions(), 5000);
   },
 
-  async showHome() {
-    document.getElementById("home-view").classList.remove("hidden");
-    document.getElementById("terminal-container").style.display = "none";
-    await this.refreshSessions();
-    this.renderHomeGrid();
+  // ── Routing ──
+
+  navigate(path) {
+    history.pushState(null, "", path);
+    this.route();
   },
 
-  showTerminal() {
+  route() {
+    const path = window.location.pathname;
+
+    if (path.startsWith("/session/")) {
+      const name = decodeURIComponent(path.slice(9));
+      this.showSession(name);
+    } else {
+      this.showHome();
+    }
+  },
+
+  async showHome() {
+    if (this.activeSession) {
+      TerminalManager.detach();
+      this.activeSession = null;
+    }
+    document.getElementById("home-view").classList.remove("hidden");
+    document.getElementById("terminal-container").classList.add("hidden");
+    await this.refreshSessions();
+    this.renderHomeGrid();
+    this.updateSessions(this.sessions);
+  },
+
+  showSession(name) {
     document.getElementById("home-view").classList.add("hidden");
-    document.getElementById("terminal-container").style.display = "";
+    document.getElementById("terminal-container").classList.remove("hidden");
+
+    if (this.activeSession !== name) {
+      this.activeSession = name;
+      TerminalManager.attach(name);
+      this.updateSessions(this.sessions);
+    }
     setTimeout(() => TerminalManager.fitAddon.fit(), 10);
   },
+
+  // ── Home grid ──
 
   renderHomeGrid() {
     const grid = document.getElementById("home-grid");
@@ -59,6 +85,14 @@ const App = {
     for (const s of this.sessions) {
       const tile = document.createElement("div");
       tile.className = "home-tile";
+
+      const close = document.createElement("button");
+      close.className = "tile-close";
+      close.textContent = "\u00d7";
+      close.addEventListener("click", (e) => {
+        e.stopPropagation();
+        this.deleteSession(s.name);
+      });
 
       const name = document.createElement("span");
       name.className = "tile-name";
@@ -71,31 +105,17 @@ const App = {
       const meta = document.createElement("div");
       meta.className = "tile-meta";
       const created = new Date(parseInt(s.created) * 1000);
-      const ago = this.timeAgo(created);
-      meta.innerHTML = `<span>${s.cols}x${s.rows}</span><span>${ago}</span>`;
-
-      const close = document.createElement("button");
-      close.className = "tile-close";
-      close.textContent = "\u00d7";
-      close.addEventListener("click", (e) => {
-        e.stopPropagation();
-        this.deleteSession(s.name);
-      });
+      meta.innerHTML = `<span>${s.cols}x${s.rows}</span><span>${this.timeAgo(created)}</span>`;
 
       tile.appendChild(close);
       tile.appendChild(name);
       tile.appendChild(canvas);
       tile.appendChild(meta);
-      tile.addEventListener("click", () => {
-        this.activeSession = s.name;
-        this.showTerminal();
-        TerminalManager.attach(s.name);
-        this.updateSessions(this.sessions);
-      });
+      tile.addEventListener("click", () => this.navigate(`/session/${encodeURIComponent(s.name)}`));
       grid.appendChild(tile);
     }
 
-    // Add "new session" tile
+    // New session tile
     const newTile = document.createElement("div");
     newTile.className = "home-tile home-tile-new";
     newTile.innerHTML = '<span class="tile-plus">+</span>';
@@ -103,24 +123,25 @@ const App = {
       const name = "session-" + Date.now().toString(36);
       await Api.createSession(name);
       await this.refreshSessions();
-      this.activeSession = name;
-      this.showTerminal();
-      TerminalManager.attach(name);
-      this.updateSessions(this.sessions);
+      this.navigate(`session/${encodeURIComponent(name)}`);
     });
     grid.appendChild(newTile);
   },
 
+  // ── Fullscreen ──
+
   enterFullscreen() {
     document.getElementById("app").classList.add("fullscreen");
     setTimeout(() => TerminalManager.fitAddon.fit(), 50);
-    TerminalManager.term.focus();
+    if (this.activeSession) TerminalManager.term.focus();
   },
 
   exitFullscreen() {
     document.getElementById("app").classList.remove("fullscreen");
     setTimeout(() => TerminalManager.fitAddon.fit(), 50);
   },
+
+  // ── Data ──
 
   async refreshSessions() {
     try {
@@ -132,6 +153,7 @@ const App = {
   updateSessions(sessions) {
     this.sessions = sessions;
 
+    // Sidebar
     const list = document.getElementById("session-list");
     list.innerHTML = "";
 
@@ -149,13 +171,7 @@ const App = {
       });
 
       li.appendChild(del);
-      li.addEventListener("click", () => {
-        this.activeSession = s.name;
-        this.showTerminal();
-        TerminalManager.attach(s.name);
-        this.updateSessions(this.sessions);
-      });
-
+      li.addEventListener("click", () => this.navigate(`/session/${encodeURIComponent(s.name)}`));
       list.appendChild(li);
     }
 
@@ -163,9 +179,7 @@ const App = {
   },
 
   setActiveSession(name) {
-    this.activeSession = name;
-    this.showTerminal();
-    this.refreshSessions();
+    this.navigate(`session/${encodeURIComponent(name)}`);
   },
 
   async createSession() {
@@ -173,23 +187,20 @@ const App = {
     const name = input.value.trim();
     if (!name) return;
 
-    try {
-      await Api.createSession(name);
-      input.value = "";
-      await this.refreshSessions();
-    } catch {}
+    await Api.createSession(name);
+    input.value = "";
+    await this.refreshSessions();
   },
 
   async deleteSession(name) {
-    try {
-      await Api.deleteSession(name);
-      if (this.activeSession === name) {
-        TerminalManager.detach();
-        this.activeSession = null;
-        this.showHome();
-      }
-      await this.refreshSessions();
-    } catch {}
+    await Api.deleteSession(name);
+    if (this.activeSession === name) {
+      this.navigate("/");
+    }
+    await this.refreshSessions();
+    if (!document.getElementById("home-view").classList.contains("hidden")) {
+      this.renderHomeGrid();
+    }
   },
 
   timeAgo(date) {

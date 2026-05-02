@@ -50,9 +50,18 @@ await app.register(sessionRoutes);
 await app.register(claudeRoutes);
 
 // Static files
+const webRoot = join(__dirname, "../../web");
 await app.register(fastifyStatic, {
-  root: join(__dirname, "../../web"),
+  root: webRoot,
   prefix: "/",
+});
+
+// SPA fallback — serve index.html for non-API, non-file routes
+app.setNotFoundHandler(async (req, reply) => {
+  if (req.url.startsWith("/api/") || req.url.startsWith("/ws")) {
+    return reply.status(404).send({ error: "Not found" });
+  }
+  return reply.sendFile("index.html");
 });
 
 // Graceful shutdown

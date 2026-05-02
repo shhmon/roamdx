@@ -365,6 +365,16 @@ button:disabled {
   line-height: 1;
 }
 
+/* ── Content area ── */
+
+#content-area {
+  flex: 1;
+  min-width: 0;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
 /* ── Terminal ── */
 
 #terminal-container {
@@ -372,6 +382,10 @@ button:disabled {
   min-width: 0;
   overflow: hidden;
   background: var(--bg);
+}
+
+#terminal-container.hidden {
+  display: none;
 }
 
 #terminal-container .xterm {
@@ -452,10 +466,6 @@ button:disabled {
 
 .fullscreen-toggle:hover {
   opacity: 0.6;
-}
-
-#terminal-container {
-  position: relative;
 }
 
 /* ── Fullscreen mode ── */
