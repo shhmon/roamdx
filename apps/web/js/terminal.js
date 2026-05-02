@@ -55,7 +55,9 @@ const TerminalManager = {
     }).observe(container);
 
     if (window.visualViewport) {
+      const app = document.getElementById("app");
       window.visualViewport.addEventListener("resize", () => {
+        app.style.height = `${window.visualViewport.height}px`;
         this.fitAddon.fit();
         this.sendResize();
       });
