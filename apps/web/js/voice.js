@@ -31,18 +31,20 @@ const Voice = {
         text += event.results[i][0].transcript;
       }
       this.transcript = text;
-      // Update textarea if visible
       const textarea = document.getElementById("claude-prompt");
       if (textarea) textarea.value = text;
     };
 
     this.recognition.onend = () => {
+      const wasRecording = this.isRecording;
       this.isRecording = false;
       this.setButtons(false);
+      if (wasRecording && this.transcript.trim()) {
+        this.send(this.transcript.trim());
+      }
     };
 
-    this.recognition.onerror = (e) => {
-      console.error("[voice]", e.error);
+    this.recognition.onerror = () => {
       this.isRecording = false;
       this.setButtons(false);
     };
@@ -57,11 +59,6 @@ const Voice = {
   start() {
     if (!this.recognition) return;
     this.transcript = "";
-    const textarea = document.getElementById("claude-prompt");
-    if (textarea) {
-      textarea.value = "";
-      textarea.placeholder = "Listening...";
-    }
     this.isRecording = true;
     this.setButtons(true);
     this.recognition.start();
@@ -69,14 +66,7 @@ const Voice = {
 
   stop() {
     if (!this.recognition) return;
-    const textarea = document.getElementById("claude-prompt");
-    if (textarea) textarea.placeholder = "Send a task...";
-    this.isRecording = false;
-    this.setButtons(false);
     this.recognition.stop();
-    if (this.transcript.trim()) {
-      this.send(this.transcript.trim());
-    }
   },
 
   send(text) {

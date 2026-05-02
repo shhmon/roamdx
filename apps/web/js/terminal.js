@@ -62,6 +62,18 @@ const TerminalManager = {
     }
 
     this.term.onData((data) => {
+      if (this.ctrlActive) {
+        // Convert to control character
+        const ch = data.toLowerCase();
+        const code = ch.charCodeAt(0) - 96;
+        if (code > 0 && code < 27) {
+          this.send({ type: "input", data: String.fromCharCode(code) });
+        }
+        this.ctrlActive = false;
+        const ctrlBtn = document.querySelector('[data-mod="ctrl"]');
+        if (ctrlBtn) ctrlBtn.classList.remove("active");
+        return;
+      }
       this.send({ type: "input", data });
     });
 
@@ -90,11 +102,16 @@ const TerminalManager = {
     bar.addEventListener("click", (e) => {
       const btn = e.target.closest("button");
       if (!btn) return;
+
+      // Don't interfere with mic button
+      if (btn.id === "voice-btn") return;
+
       e.preventDefault();
 
       if (btn.dataset.mod === "ctrl") {
         this.ctrlActive = !this.ctrlActive;
         btn.classList.toggle("active", this.ctrlActive);
+        this.term.focus();
         return;
       }
 
@@ -106,20 +123,6 @@ const TerminalManager = {
       }
     });
 
-    // Intercept next key when ctrl is active
-    this.term.attachCustomKeyEventHandler((e) => {
-      if (this.ctrlActive && e.type === "keydown" && e.key.length === 1) {
-        const code = e.key.toLowerCase().charCodeAt(0) - 96;
-        if (code > 0 && code < 27) {
-          this.send({ type: "input", data: String.fromCharCode(code) });
-          this.ctrlActive = false;
-          const ctrlBtn = document.querySelector('[data-mod="ctrl"]');
-          if (ctrlBtn) ctrlBtn.classList.remove("active");
-          return false;
-        }
-      }
-      return true;
-    });
   },
 
   connect() {
