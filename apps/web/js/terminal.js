@@ -75,6 +75,18 @@ const TerminalManager = {
     const bar = document.getElementById("mobile-keys");
     if (!bar) return;
 
+    // Keep bar above virtual keyboard
+    if (window.visualViewport) {
+      const reposition = () => {
+        const vv = window.visualViewport;
+        bar.style.position = "fixed";
+        bar.style.bottom = "auto";
+        bar.style.top = `${vv.offsetTop + vv.height - bar.offsetHeight}px`;
+      };
+      window.visualViewport.addEventListener("resize", reposition);
+      window.visualViewport.addEventListener("scroll", reposition);
+    }
+
     bar.addEventListener("click", (e) => {
       const btn = e.target.closest("button");
       if (!btn) return;
@@ -86,8 +98,9 @@ const TerminalManager = {
         return;
       }
 
-      const key = btn.dataset.key;
-      if (key) {
+      const raw = btn.dataset.key;
+      if (raw) {
+        const key = raw.replace(/\\x([0-9a-fA-F]{2})/g, (_, h) => String.fromCharCode(parseInt(h, 16)));
         this.send({ type: "input", data: key });
         this.term.focus();
       }

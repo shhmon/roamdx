@@ -555,8 +555,12 @@ button:disabled {
     padding: 6px 8px;
     background: var(--surface);
     border-top: 1px solid var(--border);
-    flex-shrink: 0;
     overflow-x: auto;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 20;
   }
 
   #mobile-keys button {
