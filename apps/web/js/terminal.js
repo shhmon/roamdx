@@ -74,9 +74,9 @@ const TerminalManager = {
       let velocity = 0;
       let accum = 0;
       let inertiaFrame = null;
-      const THRESHOLD = 32;
-      const FRICTION = 0.82;
-      const MIN_VELOCITY = 0.5;
+      const THRESHOLD = 44;
+      const FRICTION = 0.9;
+      const MIN_VELOCITY = 0.3;
 
       const sendScroll = (up) => {
         const btn = up ? 97 : 96;
@@ -84,7 +84,8 @@ const TerminalManager = {
       };
 
       const inertia = () => {
-        velocity *= FRICTION;
+        const dynamicFriction = Math.min(0.96, FRICTION + Math.abs(velocity) * 0.002);
+        velocity *= dynamicFriction;
         if (Math.abs(velocity) < MIN_VELOCITY) return;
         accum += velocity;
         while (Math.abs(accum) >= THRESHOLD) {
@@ -109,7 +110,7 @@ const TerminalManager = {
         const now = Date.now();
         const dy = lastY - e.touches[0].clientY;
         const dt = Math.max(now - lastTime, 1);
-        velocity = dy / dt * 16; // normalize to ~frame rate
+        velocity = dy / dt * 24;
         lastY = e.touches[0].clientY;
         lastTime = now;
         accum += dy;
@@ -121,7 +122,8 @@ const TerminalManager = {
 
       scrollZone.addEventListener("touchend", () => {
         lastY = null;
-        inertiaFrame = requestAnimationFrame(inertia);
+        // Run first inertia tick immediately, no delay
+        inertia();
       });
     }
 
