@@ -31,8 +31,6 @@ const Voice = {
         text += event.results[i][0].transcript;
       }
       this.transcript = text;
-      const textarea = document.getElementById("claude-prompt");
-      if (textarea) textarea.value = text;
     };
 
     this.recognition.onend = () => {
@@ -40,7 +38,7 @@ const Voice = {
       this.isRecording = false;
       this.setButtons(false);
       if (wasRecording && this.transcript.trim()) {
-        this.send(this.transcript.trim());
+        TerminalManager.send({ type: "input", data: this.transcript.trim() });
       }
     };
 
@@ -67,9 +65,5 @@ const Voice = {
   stop() {
     if (!this.recognition) return;
     this.recognition.stop();
-  },
-
-  send(text) {
-    TerminalManager.send({ type: "input", data: text });
   },
 };
