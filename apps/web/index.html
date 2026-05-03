@@ -53,24 +53,14 @@
       </aside>
 
       <div id="content-area">
-        <button id="back-btn" class="content-toggle content-toggle-left icon-btn" title="Back to home">
+        <button id="back-btn" class="content-toggle content-toggle-left overlay-btn" title="Back to home">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
           </svg>
         </button>
-        <button id="keys-btn" class="content-toggle icon-btn hidden" title="Toggle keys">
+        <button id="fab-menu-btn" class="content-toggle content-toggle-right overlay-btn hidden" title="Actions">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="2" y="4" width="20" height="16" rx="2"/><line x1="6" y1="8" x2="6" y2="8"/><line x1="10" y1="8" x2="10" y2="8"/><line x1="14" y1="8" x2="14" y2="8"/><line x1="18" y1="8" x2="18" y2="8"/><line x1="6" y1="12" x2="6" y2="12"/><line x1="10" y1="12" x2="10" y2="12"/><line x1="14" y1="12" x2="14" y2="12"/><line x1="18" y1="12" x2="18" y2="12"/><line x1="8" y1="16" x2="16" y2="16"/>
-          </svg>
-        </button>
-        <button id="hwkb-btn" class="content-toggle icon-btn hidden" title="Hardware keyboard mode">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M7 14h10"/>
-          </svg>
-        </button>
-        <button id="fullscreen-btn" class="content-toggle content-toggle-right icon-btn" title="Fullscreen">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/>
+            <circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/>
           </svg>
         </button>
 
@@ -87,6 +77,43 @@
         <main id="terminal-container"></main>
         <div id="scroll-zone"></div>
 
+        <div id="fab-menu" class="hidden">
+          <button class="fab-item" data-action="fullscreen">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/>
+            </svg>
+            <span>Fullscreen</span>
+            <span class="fab-state" data-state-for="fullscreen"></span>
+          </button>
+          <button class="fab-item" data-action="hwkb">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M6 8L2 12l4 4"/><path d="M18 8l4 4-4 4"/><line x1="14.5" y1="4" x2="9.5" y2="20"/>
+            </svg>
+            <span>Hardware keyboard</span>
+            <span class="fab-state" data-state-for="hwkb"></span>
+          </button>
+          <button class="fab-item" data-action="keys">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="4" width="20" height="16" rx="2"/><path d="M6 8h.01M10 8h.01M14 8h.01M18 8h.01M6 12h.01M10 12h.01M14 12h.01M18 12h.01M8 16h8"/>
+            </svg>
+            <span>Input bar</span>
+            <span class="fab-state" data-state-for="keys"></span>
+          </button>
+        </div>
+
+        <div id="quick-actions" class="hidden">
+          <button id="quick-enter" class="overlay-btn" title="Enter">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="9 10 4 15 9 20"/><path d="M20 4v7a4 4 0 0 1-4 4H4"/>
+            </svg>
+          </button>
+          <button id="quick-mic" class="overlay-btn" title="Voice">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/>
+            </svg>
+          </button>
+        </div>
+
         <div id="mobile-keys">
           <button data-key="\x1b">Esc</button>
           <button data-key="\x09">Tab</button>
@@ -95,14 +122,6 @@
           <button data-key="\x1b[B">↓</button>
           <button data-key="\x1b[D">←</button>
           <button data-key="\x1b[C">→</button>
-          <button data-key="\x0d">↵</button>
-          <span class="keys-spacer"></span>
-          <button id="voice-btn" class="mic-btn" title="Voice input">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
-              <path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/>
-            </svg>
-          </button>
         </div>
       </div>
     </div>

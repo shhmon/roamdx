@@ -105,7 +105,6 @@ body {
   padding-top: env(safe-area-inset-top);
   padding-left: env(safe-area-inset-left);
   padding-right: env(safe-area-inset-right);
-  padding-bottom: env(safe-area-inset-bottom);
 }
 
 #app-scroll-trap {
@@ -637,48 +636,125 @@ button:disabled {
   text-align: center;
 }
 
-/* ── Content toggles ── */
+/* ── Overlay buttons (topbar toggles + quick actions) ── */
 
-.content-toggle {
-  position: absolute;
-  top: 8px;
-  z-index: 10;
-  opacity: 0.4;
-  transition: opacity 0.15s;
+.overlay-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(28, 36, 51, 0.55);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.7;
+  transition: opacity 0.15s, background 0.15s, color 0.15s;
 }
-
-.content-toggle:hover {
+.overlay-btn:hover,
+.overlay-btn:active {
   opacity: 1;
 }
 
+/* ── Content toggles (topbar overlay buttons) ── */
+
 .content-toggle {
-  right: 10px;
-}
-.content-toggle-right {
+  position: absolute;
   top: 10px;
+  right: 10px;
+  z-index: 10;
 }
 .content-toggle-left {
   left: 10px;
   right: auto;
-  top: 10px;
 }
-#keys-btn {
-  right: 10px;
-  top: 36px;
+/* Hide back button on home view */
+#back-btn.hidden,
+#fab-menu-btn.hidden,
+#fab-menu.hidden,
+#quick-actions.hidden {
+  display: none;
 }
-#hwkb-btn {
-  right: 10px;
-  top: 62px;
-}
-#hwkb-btn.active {
-  color: var(--accent);
+
+#fab-menu-btn.open {
+  color: var(--text);
   opacity: 1;
 }
 
-/* Hide back button on home view */
-#back-btn.hidden,
-#keys-btn.hidden {
-  display: none;
+/* ── FAB menu (popped from topbar 3-dot button) ── */
+
+#fab-menu {
+  position: absolute;
+  right: 10px;
+  top: 44px;
+  background: rgba(28, 36, 51, 0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 200px;
+  z-index: 20;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+}
+.fab-item {
+  background: none;
+  color: var(--text);
+  padding: 8px 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  text-align: left;
+  border-radius: 4px;
+}
+.fab-item:hover,
+.fab-item:active {
+  background: rgba(255, 255, 255, 0.05);
+}
+.fab-item span:first-of-type {
+  flex: 1;
+}
+.fab-state {
+  font-size: 10px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.fab-item.active .fab-state {
+  color: var(--accent);
+}
+
+/* ── Quick actions (transparent bottom-right) ── */
+
+#quick-actions {
+  position: absolute;
+  right: calc(12px + env(safe-area-inset-right));
+  bottom: 32px;
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 8px;
+  z-index: 15;
+  pointer-events: none;
+}
+/* When the input bar is showing, lift the quick actions above it */
+body.bar-visible #quick-actions {
+  bottom: 64px;
+}
+#quick-actions button {
+  pointer-events: auto;
+}
+#quick-mic.recording {
+  color: var(--danger);
+  border-color: var(--danger);
+  background: rgba(242, 118, 124, 0.15);
+  opacity: 1;
+  animation: pulse 1.5s ease infinite;
 }
 
 #scroll-zone {

@@ -19,27 +19,8 @@ const App = {
     document.getElementById("logo").addEventListener("click", () => this.navigate("/"));
     document.getElementById("back-btn").addEventListener("click", () => this.navigate("/"));
 
-    document.getElementById("keys-btn").addEventListener("click", () => {
-      const bar = document.getElementById("mobile-keys");
-      bar.classList.toggle("visible");
-      localStorage.setItem("roamdx_keys", bar.classList.contains("visible") ? "1" : "0");
-      setTimeout(() => TerminalManager.fitAddon.fit(), 50);
-    });
-
-    document.getElementById("hwkb-btn").addEventListener("click", () => {
-      const on = !document.getElementById("hwkb-btn").classList.contains("active");
-      this.setHwkbMode(on);
-    });
-
-    document.getElementById("fullscreen-btn").addEventListener("click", () => {
-      const app = document.getElementById("app");
-      app.classList.toggle("fullscreen");
-      localStorage.setItem("roamdx_fullscreen", app.classList.contains("fullscreen") ? "1" : "0");
-      setTimeout(() => TerminalManager.fitAddon.fit(), 50);
-      if (!app.classList.contains("fullscreen") && this.activeSession) {
-        TerminalManager.term.focus();
-      }
-    });
+    this.initFabMenu();
+    this.initQuickActions();
 
     // Restore persisted UI state
     if (localStorage.getItem("roamdx_fullscreen") === "1") {
@@ -47,6 +28,7 @@ const App = {
     }
     if (localStorage.getItem("roamdx_keys") === "1") {
       document.getElementById("mobile-keys").classList.add("visible");
+      document.body.classList.add("bar-visible");
     }
     if (localStorage.getItem("roamdx_hwkb") === "1") {
       this.setHwkbMode(true);
@@ -85,9 +67,11 @@ const App = {
     document.getElementById("home-view").classList.remove("hidden");
     document.getElementById("terminal-container").classList.add("hidden");
     document.getElementById("back-btn").classList.add("hidden");
-    document.getElementById("keys-btn").classList.add("hidden");
-    document.getElementById("hwkb-btn").classList.add("hidden");
+    document.getElementById("fab-menu-btn").classList.add("hidden");
+    document.getElementById("fab-menu").classList.add("hidden");
+    document.getElementById("quick-actions").classList.add("hidden");
     document.getElementById("mobile-keys").classList.remove("visible");
+    document.body.classList.remove("bar-visible");
     await this.refreshSessions();
     this.renderHomeGrid();
     this.updateSessions(this.sessions);
@@ -107,8 +91,14 @@ const App = {
     document.getElementById("home-view").classList.add("hidden");
     document.getElementById("terminal-container").classList.remove("hidden");
     document.getElementById("back-btn").classList.remove("hidden");
-    document.getElementById("keys-btn").classList.remove("hidden");
-    document.getElementById("hwkb-btn").classList.remove("hidden");
+    document.getElementById("fab-menu-btn").classList.remove("hidden");
+    document.getElementById("quick-actions").classList.remove("hidden");
+
+    // Re-apply persisted input bar state when entering a session
+    if (localStorage.getItem("roamdx_keys") === "1") {
+      document.getElementById("mobile-keys").classList.add("visible");
+      document.body.classList.add("bar-visible");
+    }
 
     if (this.activeSession !== name) {
       this.activeSession = name;
@@ -204,8 +194,6 @@ const App = {
   // connected hardware keyboard.
 
   setHwkbMode(on) {
-    const btn = document.getElementById("hwkb-btn");
-    btn.classList.toggle("active", on);
     localStorage.setItem("roamdx_hwkb", on ? "1" : "0");
     const ta = document.querySelector("#terminal-container textarea.xterm-helper-textarea");
     if (ta) {
@@ -215,6 +203,105 @@ const App = {
       ta.blur();
       requestAnimationFrame(() => TerminalManager.term?.focus());
     }
+    this.refreshFabState();
+  },
+
+  setKeysBar(on) {
+    const bar = document.getElementById("mobile-keys");
+    bar.classList.toggle("visible", on);
+    document.body.classList.toggle("bar-visible", on);
+    localStorage.setItem("roamdx_keys", on ? "1" : "0");
+    setTimeout(() => TerminalManager.fitAddon.fit(), 50);
+    this.refreshFabState();
+  },
+
+  // ── FAB menu ──
+
+  initFabMenu() {
+    const fab = document.getElementById("fab-menu-btn");
+    const menu = document.getElementById("fab-menu");
+
+    const close = () => {
+      menu.classList.add("hidden");
+      fab.classList.remove("open");
+    };
+    const open = () => {
+      this.refreshFabState();
+      menu.classList.remove("hidden");
+      fab.classList.add("open");
+    };
+
+    fab.addEventListener("click", (e) => {
+      e.stopPropagation();
+      menu.classList.contains("hidden") ? open() : close();
+    });
+
+    // Close when tapping outside
+    document.addEventListener("click", (e) => {
+      if (menu.classList.contains("hidden")) return;
+      if (!menu.contains(e.target) && e.target !== fab) close();
+    });
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && !menu.classList.contains("hidden")) close();
+    });
+
+    menu.addEventListener("click", (e) => {
+      const item = e.target.closest(".fab-item");
+      if (!item) return;
+      const action = item.dataset.action;
+      if (action === "hwkb") {
+        const on = localStorage.getItem("roamdx_hwkb") !== "1";
+        this.setHwkbMode(on);
+      } else if (action === "keys") {
+        const on = !document.getElementById("mobile-keys").classList.contains("visible");
+        this.setKeysBar(on);
+      } else if (action === "fullscreen") {
+        this.toggleFullscreen();
+      }
+      close();
+    });
+  },
+
+  toggleFullscreen() {
+    const app = document.getElementById("app");
+    app.classList.toggle("fullscreen");
+    localStorage.setItem("roamdx_fullscreen", app.classList.contains("fullscreen") ? "1" : "0");
+    setTimeout(() => TerminalManager.fitAddon.fit(), 50);
+    if (!app.classList.contains("fullscreen") && this.activeSession) {
+      TerminalManager.term.focus();
+    }
+    this.refreshFabState();
+  },
+
+  initQuickActions() {
+    document.getElementById("quick-enter").addEventListener("click", (e) => {
+      e.preventDefault();
+      if (Voice.isRecording) Voice.commit(true);
+      else TerminalManager.send({ type: "input", data: "\x0d" });
+    });
+
+    document.getElementById("quick-mic").addEventListener("click", (e) => {
+      e.preventDefault();
+      if (Voice.isRecording) Voice.commit(false);
+      else Voice.start();
+    });
+  },
+
+  refreshFabState() {
+    const hwkb = localStorage.getItem("roamdx_hwkb") === "1";
+    const keys = document.getElementById("mobile-keys").classList.contains("visible");
+    const fullscreen = document.getElementById("app").classList.contains("fullscreen");
+    const set = (action, on) => {
+      const item = document.querySelector(`.fab-item[data-action="${action}"]`);
+      if (!item) return;
+      item.classList.toggle("active", on);
+      const state = item.querySelector(".fab-state");
+      if (state) state.textContent = on ? "ON" : "";
+    };
+    set("hwkb", hwkb);
+    set("keys", keys);
+    set("fullscreen", fullscreen);
   },
 
   // ── Fullscreen ──
