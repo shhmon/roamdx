@@ -1,11 +1,20 @@
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
+import { existsSync } from "node:fs";
+import { join } from "node:path";
 import type { TmuxSession } from "@roamdx/shared";
 import { DEFAULT_COLS, DEFAULT_ROWS } from "@roamdx/shared";
 import { log } from "../lib/log.js";
 import { config } from "../config.js";
 
 const exec = promisify(execFile);
+
+// Default cwd for new sessions: ~/dev if it exists, else $HOME.
+function defaultSessionCwd(): string {
+  const home = process.env.HOME || "/";
+  const dev = join(home, "dev");
+  return existsSync(dev) ? dev : home;
+}
 
 function sanitizeName(name: string): string {
   return name.replace(/[.:]/g, "-").slice(0, 64);
@@ -58,7 +67,11 @@ export async function createSession(
   rows = DEFAULT_ROWS
 ): Promise<void> {
   const safe = sanitizeName(name);
-  await tmux("new-session", "-d", "-s", safe, "-x", String(cols), "-y", String(rows));
+  await tmux(
+    "new-session", "-d", "-s", safe,
+    "-x", String(cols), "-y", String(rows),
+    "-c", defaultSessionCwd(),
+  );
 }
 
 export async function renameSession(oldName: string, newName: string): Promise<void> {
