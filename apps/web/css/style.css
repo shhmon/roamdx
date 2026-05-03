@@ -107,6 +107,7 @@ body {
   padding-right: env(safe-area-inset-right);
 }
 
+
 #app-scroll-trap {
   position: fixed;
   top: 0;
@@ -567,6 +568,13 @@ button:disabled {
 #terminal-container .xterm {
   padding: 10px 14px 1px;
   font-variant-emoji: text;
+}
+
+/* Landscape: clear the home indicator strip at the bottom */
+@media (orientation: landscape) {
+  #terminal-container .xterm {
+    padding-bottom: calc(1px + env(safe-area-inset-bottom));
+  }
 }
 
 #terminal-container .xterm-viewport {
