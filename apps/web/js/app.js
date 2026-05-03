@@ -117,77 +117,26 @@ const App = {
     grid.innerHTML = "";
 
     for (const s of this.sessions) {
-      const tile = document.createElement("div");
-      tile.className = "home-tile";
-
-      const close = document.createElement("button");
-      close.className = "tile-close";
-      close.textContent = "\u00d7";
-      close.addEventListener("click", (e) => {
-        e.stopPropagation();
-        this.deleteSession(s.name);
-      });
-
-      const name = document.createElement("span");
-      name.className = "tile-name";
-      name.textContent = s.name;
-      name.addEventListener("dblclick", (e) => {
-        e.stopPropagation();
-        const input = document.createElement("input");
-        input.className = "tile-rename";
-        input.value = s.name;
-        name.replaceWith(input);
-        input.focus();
-        input.select();
-        const commit = async () => {
-          const newName = input.value.trim();
-          if (newName && newName !== s.name) {
-            await Api.renameSession(s.name, newName);
-            await this.refreshSessions();
-            this.renderHomeGrid();
-          } else {
-            input.replaceWith(name);
-          }
-        };
-        input.addEventListener("blur", commit);
-        input.addEventListener("keydown", (ev) => {
-          if (ev.key === "Enter") { ev.preventDefault(); input.blur(); }
-          if (ev.key === "Escape") { input.removeEventListener("blur", commit); input.replaceWith(name); }
-        });
-      });
-
-      const canvas = document.createElement("canvas");
-      canvas.className = "tile-preview";
-      Preview.render(s.name, canvas);
-
-      const meta = document.createElement("div");
-      meta.className = "tile-meta";
-      const created = new Date(parseInt(s.created) * 1000);
-      const shortPath = s.path ? s.path.replace(/^\/Users\/[^/]+/, "~") : "";
-      meta.innerHTML = `<span>${s.command || "zsh"}${shortPath ? " · " + shortPath : ""}</span><span>${this.timeAgo(created)}</span>`;
-
-      tile.appendChild(close);
-      tile.appendChild(name);
-      tile.appendChild(canvas);
-      tile.appendChild(meta);
-      tile.addEventListener("click", (e) => {
-        if (e.target === name) return;
-        this.navigate(`/session/${encodeURIComponent(s.name)}`);
-      });
-      grid.appendChild(tile);
+      grid.appendChild(Tile.createSessionTile(s, {
+        onClick: (name) => this.navigate(`/session/${encodeURIComponent(name)}`),
+        onDelete: (name) => this.deleteSession(name),
+        onRename: async (newName) => {
+          await Api.renameSession(s.name, newName);
+          await this.refreshSessions();
+          this.renderHomeGrid();
+        },
+        onPreview: (name, canvas) => Preview.render(name, canvas),
+      }));
     }
 
-    // New session tile
-    const newTile = document.createElement("div");
-    newTile.className = "home-tile home-tile-new";
-    newTile.innerHTML = '<span class="tile-plus">+</span>';
-    newTile.addEventListener("click", async () => {
-      const name = "session-" + Date.now().toString(36);
-      await Api.createSession(name);
-      await this.refreshSessions();
-      this.navigate(`session/${encodeURIComponent(name)}`);
-    });
-    grid.appendChild(newTile);
+    grid.appendChild(Tile.createNewTile({
+      onCreate: async () => {
+        const name = "session-" + Date.now().toString(36);
+        await Api.createSession(name);
+        await this.refreshSessions();
+        this.navigate(`session/${encodeURIComponent(name)}`);
+      },
+    }));
   },
 
   // ── Hardware keyboard mode ──
@@ -220,48 +169,27 @@ const App = {
   // ── FAB menu ──
 
   initFabMenu() {
-    const fab = document.getElementById("fab-menu-btn");
-    const menu = document.getElementById("fab-menu");
+    const trigger = document.getElementById("fab-menu-btn");
+    const content = document.getElementById("fab-menu");
 
-    const close = () => {
-      menu.classList.add("hidden");
-      fab.classList.remove("open");
-    };
-    const open = () => {
-      this.refreshFabState();
-      menu.classList.remove("hidden");
-      fab.classList.add("open");
-    };
-
-    fab.addEventListener("click", (e) => {
-      e.stopPropagation();
-      menu.classList.contains("hidden") ? open() : close();
+    this.fabPopover = Popover.createPopover({
+      trigger,
+      content,
+      onOpen: () => this.refreshFabState(),
     });
 
-    // Close when tapping outside
-    document.addEventListener("click", (e) => {
-      if (menu.classList.contains("hidden")) return;
-      if (!menu.contains(e.target) && e.target !== fab) close();
-    });
-
-    document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape" && !menu.classList.contains("hidden")) close();
-    });
-
-    menu.addEventListener("click", (e) => {
+    content.addEventListener("click", (e) => {
       const item = e.target.closest(".fab-item");
       if (!item) return;
       const action = item.dataset.action;
       if (action === "hwkb") {
-        const on = localStorage.getItem("roamdx_hwkb") !== "1";
-        this.setHwkbMode(on);
+        this.setHwkbMode(localStorage.getItem("roamdx_hwkb") !== "1");
       } else if (action === "keys") {
-        const on = !document.getElementById("mobile-keys").classList.contains("visible");
-        this.setKeysBar(on);
+        this.setKeysBar(!document.getElementById("mobile-keys").classList.contains("visible"));
       } else if (action === "fullscreen") {
         this.toggleFullscreen();
       }
-      close();
+      this.fabPopover.close();
     });
   },
 
@@ -381,16 +309,6 @@ const App = {
     }
   },
 
-  timeAgo(date) {
-    const seconds = Math.floor((Date.now() - date.getTime()) / 1000);
-    if (seconds < 60) return "just now";
-    const minutes = Math.floor(seconds / 60);
-    if (minutes < 60) return `${minutes}m ago`;
-    const hours = Math.floor(minutes / 60);
-    if (hours < 24) return `${hours}h ago`;
-    const days = Math.floor(hours / 24);
-    return `${days}d ago`;
-  },
 };
 
 Auth.init();
