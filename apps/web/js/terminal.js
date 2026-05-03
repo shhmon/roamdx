@@ -79,7 +79,7 @@ const TerminalManager = {
       let timestamp = 0;
       let inertiaFrame = null;
       const TIME_CONSTANT = 325; // ms — matches iOS
-      const LINE_HEIGHT = 20; // px per terminal line
+      const LINE_HEIGHT = 30; // px per terminal line
 
       const sendScroll = (up) => {
         const btn = up ? 97 : 96;
