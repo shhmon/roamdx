@@ -2,6 +2,7 @@ import * as pty from "node-pty";
 import type { WebSocket } from "ws";
 import { log } from "../lib/log.js";
 import { config } from "../config.js";
+import { wakeAltScreen } from "./wake-alt-screen.js";
 
 interface PtyAttachment {
   proc: pty.IPty;
@@ -65,6 +66,7 @@ export function attachToSession(
   }
 
   att.clients.add(ws);
+  wakeAltScreen(att.proc, cols, rows);
 }
 
 export function detachClient(sessionId: string, ws: WebSocket): void {

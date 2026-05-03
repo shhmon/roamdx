@@ -495,9 +495,14 @@ button:disabled {
   margin-top: auto;
 }
 
-.home-tile:hover {
+.home-tile:hover,
+.home-tile.selected {
   background: rgba(117, 176, 247, 0.08);
   border-color: var(--accent);
+}
+/* Show the close button on keyboard-selected tile too */
+.home-tile.selected .tile-close {
+  opacity: 0.4;
 }
 
 .home-tile:has(.tile-rename) {
@@ -570,7 +575,7 @@ button:disabled {
   font-variant-emoji: text;
 }
 
-/* Landscape: clear the home indicator strip at the bottom */
+/* Landscape: clear the home indicator strip at the bottom of the terminal. */
 @media (orientation: landscape) {
   #terminal-container .xterm {
     padding-bottom: calc(1px + env(safe-area-inset-bottom));
@@ -697,18 +702,18 @@ button:disabled {
   position: absolute;
   right: 10px;
   top: 44px;
-  background: rgba(28, 36, 51, 0.92);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 4px;
+  background: rgba(28, 36, 51, 0.65);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 16px;
+  padding: 6px;
   display: flex;
   flex-direction: column;
   gap: 2px;
   min-width: 200px;
   z-index: 20;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 .fab-item {
   background: none;
@@ -740,23 +745,33 @@ button:disabled {
 
 /* ── Quick actions (transparent bottom-right) ── */
 
+/* Quick-actions: a full-width row pinned to the bottom of the terminal area.
+   Right side is the always-on column (toggle/enter/mic). Left side is the
+   modifier bar, which only renders when expanded. */
 #quick-actions {
   position: absolute;
-  right: calc(12px + env(safe-area-inset-right));
-  bottom: 32px;
+  left: 0;
+  right: 0;
+  bottom: 12px;
+  padding: 0 12px;
   display: flex;
-  flex-direction: column-reverse;
+  align-items: flex-end;
+  justify-content: space-between;
   gap: 8px;
   z-index: 15;
   pointer-events: none;
 }
-/* When the input bar is showing, lift the quick actions above it */
-body.bar-visible #quick-actions {
-  bottom: 64px;
-}
 #quick-actions button {
   pointer-events: auto;
 }
+
+#quick-stack {
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 8px;
+  margin-left: auto;
+}
+
 #quick-mic.recording {
   color: var(--danger);
   border-color: var(--danger);
@@ -801,60 +816,35 @@ body.bar-visible #quick-actions {
   opacity: 1;
 }
 
-/* ── Mobile keys ── */
+/* ── Input bar (modifier strip in the left side of quick-actions) ── */
 
-#mobile-keys {
+#input-bar {
+  display: flex;
+  gap: 8px;
+  align-items: flex-end;
+}
+#input-bar.hidden {
   display: none;
-  gap: 4px;
-  padding: 6px 8px;
-  margin-top: 4px;
-  background: var(--surface);
-  border-top: 1px solid var(--border);
-  flex-shrink: 0;
 }
-
-#mobile-keys.visible {
-  display: flex;
-}
-
-.keys-spacer {
-  flex: 1;
-}
-
-#mobile-keys button {
-  background: var(--bg);
-  color: var(--text);
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  padding: 8px 12px;
-  font-family: var(--font);
-  font-size: 12px;
-  flex-shrink: 1;
-  min-width: 0;
-  -webkit-tap-highlight-color: transparent;
-}
-
-#mobile-keys .mic-btn {
-  padding: 8px;
-  display: flex;
-  align-items: center;
-}
-
-#mobile-keys button.active {
-  background: var(--accent);
-  color: var(--bg);
+#input-bar .overlay-btn.armed {
+  color: var(--accent);
   border-color: var(--accent);
+  background: rgba(117, 176, 247, 0.18);
+  opacity: 1;
+}
+.ib-label {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  font-family: var(--font);
 }
 
-#mobile-keys .mic-btn.recording {
-  background: var(--danger);
-  color: var(--bg);
-  border-color: var(--danger);
-  animation: pulse 1.5s ease infinite;
+/* Arrow rotates when input bar is open */
+body.input-bar-open #quick-bar-toggle svg {
+  transform: rotate(180deg);
 }
-
-#mobile-keys button:active {
-  opacity: 0.7;
+#quick-bar-toggle svg {
+  transition: transform 0.18s ease;
 }
 
 /* ── Mobile ── */
@@ -887,3 +877,22 @@ body.bar-visible #quick-actions {
     height: 18px;
   }
 }
+
+#debug-overlay {
+  position: fixed;
+  left: 8px;
+  top: 60px;
+  background: rgba(0, 0, 0, 0.8);
+  color: #9be17d;
+  font-family: monospace;
+  font-size: 10px;
+  padding: 6px 8px;
+  border-radius: 4px;
+  z-index: 200;
+  pointer-events: none;
+  white-space: pre;
+}
+#debug-overlay.hidden {
+  display: none;
+}
+

@@ -69,71 +69,24 @@ const TerminalManager = {
     Scroll.init(this);
     Upload.init();
 
-    // Intercept keys before xterm.js processes them — return false to suppress
+    // Intercept keys before xterm.js processes them — return false to suppress.
+    // Global app shortcuts (Ctrl+F, Ctrl+Q) win over the document listener
+    // because xterm consumes the event when its textarea has focus.
     this.term.attachCustomKeyEventHandler((event) => {
+      if (GlobalKeys.handleGlobalKey(event, App)) return false;
       if (Keybindings.handle(event, this)) return false;
       return true;
     });
 
     this.term.onData((data) => {
-      if (this.ctrlActive) {
-        // Convert to control character
-        const ch = data.toLowerCase();
-        const code = ch.charCodeAt(0) - 96;
-        if (code > 0 && code < 27) {
-          this.send({ type: "input", data: String.fromCharCode(code) });
-        }
-        this.ctrlActive = false;
-        const ctrlBtn = document.querySelector('[data-mod="ctrl"]');
-        if (ctrlBtn) ctrlBtn.classList.remove("active");
-        return;
-      }
-      this.send({ type: "input", data });
+      // Apply armed input-bar modifiers (shift/ctrl) to the next keystroke.
+      // The bar clears its armed state after consuming the keypress.
+      const ib = App.inputBar;
+      const out = ib && ib.isArmed() ? ib.applyToData(data) : data;
+      this.send({ type: "input", data: out });
     });
 
-    this.initMobileKeys();
     this.connect();
-  },
-
-  ctrlActive: false,
-
-  initMobileKeys() {
-    const bar = document.getElementById("mobile-keys");
-    if (!bar) return;
-
-    bar.addEventListener("click", (e) => {
-      const btn = e.target.closest("button");
-      if (!btn) return;
-
-      // Don't interfere with mic button
-      if (btn.id === "voice-btn") return;
-
-      e.preventDefault();
-
-      if (btn.dataset.mod === "ctrl") {
-        this.ctrlActive = !this.ctrlActive;
-        btn.classList.toggle("active", this.ctrlActive);
-        this.term.focus();
-        return;
-      }
-
-      // If recording and Enter pressed, stop recording (onend will send transcript + Enter)
-      if (Voice.isRecording && btn.dataset.key === "\\x0d") {
-        Voice.sendEnterOnStop = true;
-        Voice.stop();
-        return;
-      }
-
-      const raw = btn.dataset.key;
-      if (raw) {
-        const key = raw.replace(/\\x([0-9a-fA-F]{2})/g, (_, h) => String.fromCharCode(parseInt(h, 16)));
-        this.send({ type: "input", data: key });
-        // Only refocus if virtual keyboard is already up
-        const kbOpen = window.visualViewport && window.visualViewport.height < window.innerHeight * 0.85;
-        if (kbOpen) this.term.focus();
-      }
-    });
-
   },
 
   connect() {

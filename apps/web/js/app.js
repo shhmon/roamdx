@@ -2,6 +2,7 @@ const App = {
   sessions: [],
   pollTimer: null,
   initialized: false,
+  inputBar: null,
   // The active session name is read from TerminalManager.currentSession,
   // which is the single source of truth (it persists across WS reconnects).
   get activeSession() { return TerminalManager.currentSession; },
@@ -20,18 +21,54 @@ const App = {
     });
 
     document.getElementById("logo").addEventListener("click", () => this.navigate("/"));
+
+    // Debug overlay: triple-tap the logo to toggle.
+    let logoTaps = 0;
+    let logoTimer = null;
+    document.getElementById("logo").addEventListener("click", () => {
+      logoTaps++;
+      clearTimeout(logoTimer);
+      logoTimer = setTimeout(() => { logoTaps = 0; }, 600);
+      if (logoTaps >= 3) {
+        document.getElementById("debug-overlay").classList.toggle("hidden");
+        logoTaps = 0;
+      }
+    });
+
+    // Debug overlay: live-update layout numbers when visible.
+    const debugEl = document.getElementById("debug-overlay");
+    const debugTick = () => {
+      if (debugEl.classList.contains("hidden")) return;
+      const isl = document.getElementById("isl");
+      const r = isl.getBoundingClientRect();
+      const vv = window.visualViewport;
+      const cssVh = getComputedStyle(document.documentElement).getPropertyValue("--isl-vh").trim();
+      debugEl.textContent =
+        `vv.h=${vv?.height|0} inner.h=${window.innerHeight}\n` +
+        `--isl-vh=${cssVh} (×100=${(parseFloat(cssVh)*100)|0})\n` +
+        `#isl rect: top=${r.top|0} bot=${r.bottom|0} h=${r.height|0}\n` +
+        `body.h=${document.body.getBoundingClientRect().height|0}`;
+    };
+    setInterval(debugTick, 200);
     document.getElementById("back-btn").addEventListener("click", () => this.navigate("/"));
 
+    this.inputBar = InputBar.createInputBar({
+      bar: document.getElementById("input-bar"),
+      terminalManager: TerminalManager,
+      body: document.body,
+    });
+    this.homeNav = HomeNav.createHomeNav({
+      grid: document.getElementById("home-grid"),
+      isActive: () => !document.getElementById("home-view").classList.contains("hidden"),
+      onDelete: (name) => this.deleteSession(name),
+    });
+    GlobalKeys.installGlobalKeys(this);
     this.initFabMenu();
     this.initQuickActions();
 
     // Restore persisted UI state
     if (localStorage.getItem("roamdx_fullscreen") === "1") {
       document.getElementById("app").classList.add("fullscreen");
-    }
-    if (localStorage.getItem("roamdx_keys") === "1") {
-      document.getElementById("mobile-keys").classList.add("visible");
-      document.body.classList.add("bar-visible");
     }
     if (localStorage.getItem("roamdx_hwkb") === "1") {
       this.setHwkbMode(true);
@@ -72,11 +109,11 @@ const App = {
     document.getElementById("fab-menu-btn").classList.add("hidden");
     document.getElementById("fab-menu").classList.add("hidden");
     document.getElementById("quick-actions").classList.add("hidden");
-    document.getElementById("mobile-keys").classList.remove("visible");
-    document.body.classList.remove("bar-visible");
+    this.inputBar?.hide();
     await this.refreshSessions();
     this.renderHomeGrid();
     this.updateSessions(this.sessions);
+    this.homeNav?.reset();
   },
 
   async showSession(name) {
@@ -95,12 +132,6 @@ const App = {
     document.getElementById("back-btn").classList.remove("hidden");
     document.getElementById("fab-menu-btn").classList.remove("hidden");
     document.getElementById("quick-actions").classList.remove("hidden");
-
-    // Re-apply persisted input bar state when entering a session
-    if (localStorage.getItem("roamdx_keys") === "1") {
-      document.getElementById("mobile-keys").classList.add("visible");
-      document.body.classList.add("bar-visible");
-    }
 
     if (this.activeSession !== name) {
       // attach() updates TerminalManager.currentSession, which our getter exposes
@@ -137,6 +168,8 @@ const App = {
         this.navigate(`session/${encodeURIComponent(name)}`);
       },
     }));
+
+    this.homeNav?.refresh();
   },
 
   // ── Hardware keyboard mode ──
@@ -150,19 +183,9 @@ const App = {
     if (ta) {
       if (on) ta.setAttribute("inputmode", "none");
       else ta.removeAttribute("inputmode");
-      // Re-focus to make iOS pick up the change
       ta.blur();
       requestAnimationFrame(() => TerminalManager.term?.focus());
     }
-    this.refreshFabState();
-  },
-
-  setKeysBar(on) {
-    const bar = document.getElementById("mobile-keys");
-    bar.classList.toggle("visible", on);
-    document.body.classList.toggle("bar-visible", on);
-    localStorage.setItem("roamdx_keys", on ? "1" : "0");
-    TerminalManager.scheduleRefit();
     this.refreshFabState();
   },
 
@@ -184,8 +207,6 @@ const App = {
       const action = item.dataset.action;
       if (action === "hwkb") {
         this.setHwkbMode(localStorage.getItem("roamdx_hwkb") !== "1");
-      } else if (action === "keys") {
-        this.setKeysBar(!document.getElementById("mobile-keys").classList.contains("visible"));
       } else if (action === "fullscreen") {
         this.toggleFullscreen();
       }
@@ -205,22 +226,31 @@ const App = {
   },
 
   initQuickActions() {
+    const refocus = () => TerminalManager.term?.focus();
+
+    document.getElementById("quick-bar-toggle").addEventListener("click", (e) => {
+      e.preventDefault();
+      this.inputBar.toggle();
+      refocus();
+    });
+
     document.getElementById("quick-enter").addEventListener("click", (e) => {
       e.preventDefault();
       if (Voice.isRecording) Voice.commit(true);
       else TerminalManager.send({ type: "input", data: "\x0d" });
+      refocus();
     });
 
     document.getElementById("quick-mic").addEventListener("click", (e) => {
       e.preventDefault();
       if (Voice.isRecording) Voice.commit(false);
       else Voice.start();
+      // Don't refocus on mic — Voice owns its own focus flow.
     });
   },
 
   refreshFabState() {
     const hwkb = localStorage.getItem("roamdx_hwkb") === "1";
-    const keys = document.getElementById("mobile-keys").classList.contains("visible");
     const fullscreen = document.getElementById("app").classList.contains("fullscreen");
     const set = (action, on) => {
       const item = document.querySelector(`.fab-item[data-action="${action}"]`);
@@ -230,7 +260,6 @@ const App = {
       if (state) state.textContent = on ? "ON" : "";
     };
     set("hwkb", hwkb);
-    set("keys", keys);
     set("fullscreen", fullscreen);
   },
 

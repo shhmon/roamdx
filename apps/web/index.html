@@ -92,36 +92,48 @@
             <span>Hardware keyboard</span>
             <span class="fab-state" data-state-for="hwkb"></span>
           </button>
-          <button class="fab-item" data-action="keys">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="2" y="4" width="20" height="16" rx="2"/><path d="M6 8h.01M10 8h.01M14 8h.01M18 8h.01M6 12h.01M10 12h.01M14 12h.01M18 12h.01M8 16h8"/>
-            </svg>
-            <span>Input bar</span>
-            <span class="fab-state" data-state-for="keys"></span>
-          </button>
         </div>
 
         <div id="quick-actions" class="hidden">
-          <button id="quick-enter" class="overlay-btn" title="Enter">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <polyline points="9 10 4 15 9 20"/><path d="M20 4v7a4 4 0 0 1-4 4H4"/>
-            </svg>
-          </button>
-          <button id="quick-mic" class="overlay-btn" title="Voice">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/>
-            </svg>
-          </button>
-        </div>
-
-        <div id="mobile-keys">
-          <button data-key="\x1b">Esc</button>
-          <button data-key="\x09">Tab</button>
-          <button data-mod="ctrl">Ctrl</button>
-          <button data-key="\x1b[A">↑</button>
-          <button data-key="\x1b[B">↓</button>
-          <button data-key="\x1b[D">←</button>
-          <button data-key="\x1b[C">→</button>
+          <div id="input-bar" class="hidden">
+            <button class="overlay-btn" data-action="esc" title="Esc">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="19 7 13 13 19 19"/><polyline points="13 7 7 13 13 19"/>
+              </svg>
+            </button>
+            <button class="overlay-btn" data-action="tab" title="Tab">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="7 8 11 12 7 16"/><line x1="13" y1="6" x2="13" y2="18"/>
+              </svg>
+            </button>
+            <button class="overlay-btn" data-action="shift" title="Shift">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 3l8 9h-5v9h-6v-9H4z"/>
+              </svg>
+            </button>
+            <button class="overlay-btn" data-action="ctrl" title="Ctrl">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="6 14 12 8 18 14"/>
+              </svg>
+            </button>
+          </div>
+          <div id="quick-stack">
+            <button id="quick-bar-toggle" class="overlay-btn" title="Toggle input bar">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="9 6 15 12 9 18"/>
+              </svg>
+            </button>
+            <button id="quick-enter" class="overlay-btn" title="Enter">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="9 10 4 15 9 20"/><path d="M20 4v7a4 4 0 0 1-4 4H4"/>
+              </svg>
+            </button>
+            <button id="quick-mic" class="overlay-btn" title="Voice">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/>
+              </svg>
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -131,6 +143,8 @@
       </div>
     </div>
   </div>
+
+  <div id="debug-overlay" class="hidden"></div>
 
   <div id="auth-overlay">
     <div class="auth-card">
@@ -149,6 +163,9 @@
   <script type="module" src="/lib/format.js"></script>
   <script type="module" src="/lib/popover.js"></script>
   <script type="module" src="/lib/tile.js"></script>
+  <script type="module" src="/lib/input-bar.js"></script>
+  <script type="module" src="/lib/home-nav.js"></script>
+  <script type="module" src="/lib/global-keys.js"></script>
   <script src="/js/auth.js"></script>
   <script src="/js/api.js"></script>
   <script src="/js/keybindings.js"></script>
