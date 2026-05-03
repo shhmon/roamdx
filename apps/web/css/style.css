@@ -571,7 +571,7 @@ button:disabled {
 }
 
 #terminal-container .xterm {
-  padding: 10px 1px 1px 14px;
+  padding: 10px 0 1px 14px;
   font-variant-emoji: text;
 }
 
@@ -770,6 +770,12 @@ button:disabled {
   flex-direction: column-reverse;
   gap: 8px;
   margin-left: auto;
+}
+
+#input-cluster {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
 }
 
 #quick-mic.recording {
