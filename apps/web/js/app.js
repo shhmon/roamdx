@@ -209,6 +209,8 @@ const App = {
         this.setHwkbMode(localStorage.getItem("roamdx_hwkb") !== "1");
       } else if (action === "fullscreen") {
         this.toggleFullscreen();
+      } else if (action === "wake") {
+        TerminalManager.send({ type: "wake" });
       }
       this.fabPopover.close();
     });

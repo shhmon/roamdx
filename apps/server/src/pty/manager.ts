@@ -93,6 +93,12 @@ export function resizeSession(sessionId: string, cols: number, rows: number): vo
   att.proc.resize(cols, rows);
 }
 
+export function wakeSession(sessionId: string): void {
+  const att = attachments.get(sessionId);
+  if (!att) return;
+  wakeAltScreen(att.proc, att.proc.cols, att.proc.rows);
+}
+
 export function shutdown(): void {
   for (const att of attachments.values()) {
     att.proc.kill();

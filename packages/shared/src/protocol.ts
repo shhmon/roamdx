@@ -24,11 +24,16 @@ export const DetachMessage = v.object({
   type: v.literal("detach"),
 });
 
+export const WakeMessage = v.object({
+  type: v.literal("wake"),
+});
+
 export const ClientMessageSchema = v.variant("type", [
   AttachMessage,
   InputMessage,
   ResizeMessage,
   DetachMessage,
+  WakeMessage,
 ]);
 
 export type ClientMessage = v.InferOutput<typeof ClientMessageSchema>;

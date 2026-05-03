@@ -2,7 +2,7 @@ import type { WebSocket } from "ws";
 import * as v from "valibot";
 import { ClientMessageSchema, DEFAULT_COLS, DEFAULT_ROWS } from "@roamdx/shared";
 import { hasSession } from "../tmux/bridge.js";
-import { attachToSession, detachClient, writeInput, resizeSession } from "../pty/manager.js";
+import { attachToSession, detachClient, writeInput, resizeSession, wakeSession } from "../pty/manager.js";
 
 export function handleConnection(ws: WebSocket) {
   let attachedSession: string | null = null;
@@ -59,6 +59,12 @@ export function handleConnection(ws: WebSocket) {
           detachClient(attachedSession, ws);
           attachedSession = null;
         }
+        break;
+      }
+
+      case "wake": {
+        if (!attachedSession) return;
+        wakeSession(attachedSession);
         break;
       }
     }
