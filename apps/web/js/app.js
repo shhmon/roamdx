@@ -20,18 +20,29 @@ const App = {
     document.getElementById("back-btn").addEventListener("click", () => this.navigate("/"));
 
     document.getElementById("keys-btn").addEventListener("click", () => {
-      document.getElementById("mobile-keys").classList.toggle("visible");
+      const bar = document.getElementById("mobile-keys");
+      bar.classList.toggle("visible");
+      localStorage.setItem("roamdx_keys", bar.classList.contains("visible") ? "1" : "0");
       setTimeout(() => TerminalManager.fitAddon.fit(), 50);
     });
 
     document.getElementById("fullscreen-btn").addEventListener("click", () => {
       const app = document.getElementById("app");
       app.classList.toggle("fullscreen");
+      localStorage.setItem("roamdx_fullscreen", app.classList.contains("fullscreen") ? "1" : "0");
       setTimeout(() => TerminalManager.fitAddon.fit(), 50);
       if (!app.classList.contains("fullscreen") && this.activeSession) {
         TerminalManager.term.focus();
       }
     });
+
+    // Restore persisted UI state
+    if (localStorage.getItem("roamdx_fullscreen") === "1") {
+      document.getElementById("app").classList.add("fullscreen");
+    }
+    if (localStorage.getItem("roamdx_keys") === "1") {
+      document.getElementById("mobile-keys").classList.add("visible");
+    }
 
     window.addEventListener("popstate", () => this.route());
 

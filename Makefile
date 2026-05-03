@@ -1,5 +1,8 @@
+include .env
+export
+
 PORT ?= 3001
-TOKEN ?= changeme
+TOKEN ?= $(ROAMDX_TOKEN)
 
 .PHONY: dev start stop restart logs status install typecheck build clean
 
