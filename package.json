@@ -5,9 +5,14 @@
   "scripts": {
     "dev": "pnpm -C apps/server dev",
     "build": "pnpm -C apps/server build",
-    "start": "pnpm -C apps/server start"
+    "start": "pnpm -C apps/server start",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "devDependencies": {
+    "vitest": "^2.0.0"
   },
   "pnpm": {
-    "onlyBuiltDependencies": ["esbuild", "node-pty"]
+    "onlyBuiltDependencies": ["esbuild", "node-pty", "sharp"]
   }
 }

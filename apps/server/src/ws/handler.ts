@@ -1,6 +1,6 @@
 import type { WebSocket } from "ws";
-import type { ClientMessage } from "@roamdx/shared";
-import { DEFAULT_COLS, DEFAULT_ROWS } from "@roamdx/shared";
+import * as v from "valibot";
+import { ClientMessageSchema, DEFAULT_COLS, DEFAULT_ROWS } from "@roamdx/shared";
 import { hasSession } from "../tmux/bridge.js";
 import { attachToSession, detachClient, writeInput, resizeSession } from "../pty/manager.js";
 
@@ -8,13 +8,20 @@ export function handleConnection(ws: WebSocket) {
   let attachedSession: string | null = null;
 
   ws.on("message", async (raw) => {
-    let msg: ClientMessage;
+    let parsed: unknown;
     try {
-      msg = JSON.parse(raw.toString());
+      parsed = JSON.parse(raw.toString());
     } catch {
-      ws.send(JSON.stringify({ type: "error", message: "Invalid message" }));
+      ws.send(JSON.stringify({ type: "error", message: "Invalid JSON" }));
       return;
     }
+
+    const result = v.safeParse(ClientMessageSchema, parsed);
+    if (!result.success) {
+      ws.send(JSON.stringify({ type: "error", message: "Invalid message shape" }));
+      return;
+    }
+    const msg = result.output;
 
     switch (msg.type) {
       case "attach": {

@@ -2,6 +2,8 @@ import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import type { TmuxSession } from "@roamdx/shared";
 import { DEFAULT_COLS, DEFAULT_ROWS } from "@roamdx/shared";
+import { log } from "../lib/log.js";
+import { config } from "../config.js";
 
 const exec = promisify(execFile);
 
@@ -9,8 +11,15 @@ function sanitizeName(name: string): string {
   return name.replace(/[.:]/g, "-").slice(0, 64);
 }
 
+// "no server running" is expected when tmux hasn't been started — not an error.
+function isNoServer(err: unknown): boolean {
+  const msg = (err as { stderr?: string; message?: string })?.stderr ??
+    (err as { message?: string })?.message ?? "";
+  return /no server running/i.test(msg);
+}
+
 async function tmux(...args: string[]): Promise<string> {
-  const { stdout } = await exec("tmux", args);
+  const { stdout } = await exec(config.tmuxBin, args);
   return stdout;
 }
 
@@ -37,7 +46,8 @@ export async function listSessions(): Promise<TmuxSession[]> {
           path: path || "",
         };
       });
-  } catch {
+  } catch (err) {
+    if (!isNoServer(err)) log.error("tmux list-sessions failed", { err: String(err) });
     return [];
   }
 }
@@ -63,7 +73,13 @@ export async function hasSession(name: string): Promise<boolean> {
   try {
     await tmux("has-session", "-t", sanitizeName(name));
     return true;
-  } catch {
+  } catch (err) {
+    // tmux exits 1 when the session doesn't exist — that's the expected "no" path.
+    // Only log if it's something else (e.g. tmux binary missing).
+    const msg = (err as { stderr?: string })?.stderr ?? "";
+    if (!/can't find session/i.test(msg) && !isNoServer(err)) {
+      log.error("tmux has-session failed", { name, err: String(err) });
+    }
     return false;
   }
 }

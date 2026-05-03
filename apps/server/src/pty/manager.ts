@@ -1,7 +1,7 @@
 import * as pty from "node-pty";
 import type { WebSocket } from "ws";
-
-const TMUX_PATH = "/opt/homebrew/bin/tmux";
+import { log } from "../lib/log.js";
+import { config } from "../config.js";
 
 interface PtyAttachment {
   proc: pty.IPty;
@@ -24,8 +24,10 @@ export function attachToSession(
     let proc: pty.IPty;
     try {
       const env = { ...process.env } as Record<string, string>;
+      // Ensure homebrew/local bins are in PATH so node-pty can resolve tmux
+      // and tools spawned by the user shell (claude, fzf, etc).
       env.PATH = `/opt/homebrew/bin:/usr/local/bin:${env.PATH || ""}`;
-      proc = pty.spawn(TMUX_PATH, ["attach", "-t", sessionId], {
+      proc = pty.spawn(config.tmuxBin, ["attach", "-t", sessionId], {
         name: "xterm-256color",
         cols,
         rows,
@@ -33,6 +35,7 @@ export function attachToSession(
         env,
       });
     } catch (err) {
+      log.error("pty spawn failed", { sessionId, err: String(err) });
       ws.send(JSON.stringify({ type: "error", message: `Failed to attach: ${err}` }));
       return;
     }
@@ -49,7 +52,8 @@ export function attachToSession(
       }
     });
 
-    proc.onExit(() => {
+    proc.onExit(({ exitCode, signal }) => {
+      log.info("pty exited", { sessionId, exitCode, signal, clients: att!.clients.size });
       const msg = JSON.stringify({ type: "error", message: `Session "${sessionId}" ended` });
       for (const client of att!.clients) {
         if (client.readyState === 1) client.send(msg);

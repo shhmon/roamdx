@@ -1,8 +1,10 @@
 const App = {
   sessions: [],
-  activeSession: null,
   pollTimer: null,
   initialized: false,
+  // The active session name is read from TerminalManager.currentSession,
+  // which is the single source of truth (it persists across WS reconnects).
+  get activeSession() { return TerminalManager.currentSession; },
 
   async init() {
     if (!Auth.isAuthenticated() || this.initialized) return;
@@ -10,6 +12,7 @@ const App = {
 
     TerminalManager.init();
     ClaudePanel.init();
+    Voice.init();
 
     document.getElementById("new-session-btn").addEventListener("click", () => this.createSession());
     document.getElementById("new-session-name").addEventListener("keydown", (e) => {
@@ -62,7 +65,6 @@ const App = {
   async showHome() {
     if (this.activeSession) {
       TerminalManager.detach();
-      this.activeSession = null;
     }
     document.getElementById("home-view").classList.remove("hidden");
     document.getElementById("terminal-container").classList.add("hidden");
@@ -101,11 +103,11 @@ const App = {
     }
 
     if (this.activeSession !== name) {
-      this.activeSession = name;
+      // attach() updates TerminalManager.currentSession, which our getter exposes
       TerminalManager.attach(name);
       this.updateSessions(this.sessions);
     }
-    setTimeout(() => TerminalManager.fitAddon.fit(), 10);
+    TerminalManager.scheduleRefit();
   },
 
   // ── Home grid ──
@@ -211,7 +213,7 @@ const App = {
     bar.classList.toggle("visible", on);
     document.body.classList.toggle("bar-visible", on);
     localStorage.setItem("roamdx_keys", on ? "1" : "0");
-    setTimeout(() => TerminalManager.fitAddon.fit(), 50);
+    TerminalManager.scheduleRefit();
     this.refreshFabState();
   },
 
@@ -267,7 +269,7 @@ const App = {
     const app = document.getElementById("app");
     app.classList.toggle("fullscreen");
     localStorage.setItem("roamdx_fullscreen", app.classList.contains("fullscreen") ? "1" : "0");
-    setTimeout(() => TerminalManager.fitAddon.fit(), 50);
+    TerminalManager.scheduleRefit();
     if (!app.classList.contains("fullscreen") && this.activeSession) {
       TerminalManager.term.focus();
     }
@@ -308,13 +310,13 @@ const App = {
 
   enterFullscreen() {
     document.getElementById("app").classList.add("fullscreen");
-    setTimeout(() => TerminalManager.fitAddon.fit(), 50);
+    TerminalManager.scheduleRefit();
     if (this.activeSession) TerminalManager.term.focus();
   },
 
   exitFullscreen() {
     document.getElementById("app").classList.remove("fullscreen");
-    setTimeout(() => TerminalManager.fitAddon.fit(), 50);
+    TerminalManager.scheduleRefit();
   },
 
   // ── Data ──

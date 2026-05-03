@@ -197,6 +197,16 @@ const TerminalManager = {
     }
   },
 
+  // Refit after layout settles. Two rAFs is the standard "wait one full
+  // layout pass" idiom — replaces the old setTimeout(..., 10/50) magic.
+  scheduleRefit() {
+    if (!this.fitAddon) return;
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      this.fitAddon.fit();
+      this.sendResize();
+    }));
+  },
+
   attach(sessionId) {
     this.currentSession = sessionId;
     this.term.reset();

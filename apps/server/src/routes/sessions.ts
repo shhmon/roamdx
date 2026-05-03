@@ -1,5 +1,7 @@
 import type { FastifyInstance } from "fastify";
+import { CreateSessionBody, RenameSessionBody } from "@roamdx/shared";
 import { listSessions, createSession, killSession, renameSession, capturePane } from "../tmux/bridge.js";
+import { parseBody } from "../lib/validate.js";
 
 export async function sessionRoutes(app: FastifyInstance) {
   app.get("/api/sessions", async () => {
@@ -14,39 +16,34 @@ export async function sessionRoutes(app: FastifyInstance) {
       try {
         const content = await capturePane(req.params.name);
         return { content };
-      } catch {
+      } catch (err) {
+        req.log.warn({ err, name: req.params.name }, "capturePane failed");
         return reply.status(404).send({ error: "Session not found" });
       }
     }
   );
 
-  app.post<{ Params: { name: string }; Body: { name: string } }>(
+  app.post<{ Params: { name: string } }>(
     "/api/sessions/:name/rename",
     async (req, reply) => {
-      const newName = req.body.name;
-      if (!newName || typeof newName !== "string") {
-        return reply.status(400).send({ error: "name is required" });
-      }
+      const body = parseBody(req, reply, RenameSessionBody);
+      if (!body) return;
       try {
-        await renameSession(req.params.name, newName);
+        await renameSession(req.params.name, body.name);
         return { ok: true };
-      } catch {
-        return reply.status(404).send({ error: "Session not found" });
+      } catch (err) {
+        req.log.warn({ err, from: req.params.name, to: body.name }, "renameSession failed");
+        return reply.status(404).send({ error: "Session not found or rename failed" });
       }
     }
   );
 
-  app.post<{ Body: { name: string; cols?: number; rows?: number } }>(
-    "/api/sessions",
-    async (req, reply) => {
-      const { name, cols, rows } = req.body;
-      if (!name || typeof name !== "string") {
-        return reply.status(400).send({ error: "name is required" });
-      }
-      await createSession(name, cols, rows);
-      return reply.status(201).send({ ok: true });
-    }
-  );
+  app.post("/api/sessions", async (req, reply) => {
+    const body = parseBody(req, reply, CreateSessionBody);
+    if (!body) return;
+    await createSession(body.name, body.cols, body.rows);
+    return reply.status(201).send({ ok: true });
+  });
 
   app.delete<{ Params: { name: string } }>(
     "/api/sessions/:name",

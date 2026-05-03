@@ -1,23 +1,16 @@
 import type { FastifyInstance } from "fastify";
-import { mkdir, writeFile, unlink } from "node:fs/promises";
+import { mkdir, writeFile } from "node:fs/promises";
 import { join, extname } from "node:path";
 import { homedir } from "node:os";
 import { randomBytes } from "node:crypto";
-import { execFile } from "node:child_process";
-import { promisify } from "node:util";
-
-const exec = promisify(execFile);
+import sharp from "sharp";
+import heicConvert from "heic-convert";
 
 const UPLOAD_DIR = join(homedir(), ".roamdx", "uploads");
 const ALLOWED = new Set([".png", ".jpg", ".jpeg", ".webp", ".heic", ".heif", ".gif"]);
 const MAX_SIZE = 20 * 1024 * 1024; // 20MB
 const MAX_EDGE = 1600;
 const JPEG_QUALITY = 80;
-
-// sips can't re-encode animated GIFs without flattening; leave them alone.
-const SKIP_COMPRESS = new Set([".gif"]);
-// HEIC/HEIF can't be opened by most tools, so always convert to JPEG.
-const FORCE_CONVERT = new Set([".heic", ".heif"]);
 
 export async function uploadRoutes(app: FastifyInstance) {
   await mkdir(UPLOAD_DIR, { recursive: true });
@@ -40,29 +33,51 @@ export async function uploadRoutes(app: FastifyInstance) {
 
     const id = randomBytes(6).toString("hex");
     const baseName = `${Date.now()}-${id}`;
-    const srcPath = join(UPLOAD_DIR, `${baseName}${ext}`);
-    await writeFile(srcPath, buffer);
 
-    if (SKIP_COMPRESS.has(ext)) {
-      return { path: srcPath, filename: `${baseName}${ext}` };
+    // Animated GIFs: leave alone (re-encoding would flatten frames).
+    if (ext === ".gif") {
+      const path = join(UPLOAD_DIR, `${baseName}${ext}`);
+      await writeFile(path, buffer);
+      return { path, filename: `${baseName}${ext}` };
     }
 
-    const outExt = FORCE_CONVERT.has(ext) ? ".jpg" : ext;
-    const outPath = join(UPLOAD_DIR, `${baseName}${outExt}`);
-
     try {
-      const args = ["-Z", String(MAX_EDGE)];
-      if (outExt === ".jpg" || outExt === ".jpeg") {
-        args.push("-s", "format", "jpeg", "-s", "formatOptions", String(JPEG_QUALITY));
+      // HEIC/HEIF: most tools can't read it. Convert to JPEG buffer first,
+      // then run sharp on the result for resize + quality control.
+      let input = buffer;
+      let outExt = ext;
+      if (ext === ".heic" || ext === ".heif") {
+        // heic-convert's @types says ArrayBufferLike, but the underlying
+        // heic-decode actually wants something with iterable .slice — a
+        // Buffer/Uint8Array works, a plain ArrayBuffer does not.
+        const converted = await heicConvert({
+          buffer: buffer as unknown as ArrayBufferLike,
+          format: "JPEG",
+          quality: 1,
+        });
+        input = Buffer.from(converted);
+        outExt = ".jpg";
       }
-      args.push(srcPath, "--out", outPath);
-      await exec("sips", args);
 
-      if (outPath !== srcPath) await unlink(srcPath);
-      return { path: outPath, filename: `${baseName}${outExt}` };
+      const isJpeg = outExt === ".jpg" || outExt === ".jpeg";
+      const pipeline = sharp(input).rotate().resize({
+        width: MAX_EDGE,
+        height: MAX_EDGE,
+        fit: "inside",
+        withoutEnlargement: true,
+      });
+      const out = isJpeg
+        ? await pipeline.jpeg({ quality: JPEG_QUALITY, mozjpeg: true }).toBuffer()
+        : await pipeline.toBuffer();
+
+      const path = join(UPLOAD_DIR, `${baseName}${outExt}`);
+      await writeFile(path, out);
+      return { path, filename: `${baseName}${outExt}` };
     } catch (err) {
-      req.log.error({ err }, "image compression failed");
-      return { path: srcPath, filename: `${baseName}${ext}` };
+      req.log.error({ err, ext }, "image processing failed; storing original");
+      const path = join(UPLOAD_DIR, `${baseName}${ext}`);
+      await writeFile(path, buffer);
+      return { path, filename: `${baseName}${ext}` };
     }
   });
 }

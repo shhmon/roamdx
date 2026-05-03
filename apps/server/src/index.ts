@@ -5,7 +5,10 @@ import fastifyCors from "@fastify/cors";
 import fastifyMultipart from "@fastify/multipart";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
+import { execFile } from "node:child_process";
+import { promisify } from "node:util";
 import { config } from "./config.js";
+import { log } from "./lib/log.js";
 import { sessionRoutes } from "./routes/sessions.js";
 import { claudeRoutes } from "./routes/claude.js";
 import { statusRoutes } from "./routes/status.js";
@@ -14,6 +17,19 @@ import { handleConnection } from "./ws/handler.js";
 import { shutdown } from "./pty/manager.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
+
+// Verify tmux is resolvable before booting. node-pty's spawn errors are
+// hard to debug ("posix_spawnp failed") so we surface a clearer message.
+const exec = promisify(execFile);
+try {
+  await exec(config.tmuxBin, ["-V"], {
+    env: { ...process.env, PATH: `/opt/homebrew/bin:/usr/local/bin:${process.env.PATH || ""}` },
+  });
+} catch (err) {
+  log.error("tmux not found or failed to run", { tmuxBin: config.tmuxBin, err: String(err) });
+  console.error(`[startup] Could not run tmux at "${config.tmuxBin}". Set TMUX_BIN to the full path.`);
+  process.exit(1);
+}
 
 const app = Fastify({ logger: true });
 
