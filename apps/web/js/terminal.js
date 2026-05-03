@@ -218,7 +218,7 @@ const TerminalManager = {
       const msg = JSON.parse(event.data);
       switch (msg.type) {
         case "output":
-          this.term.write(msg.data);
+          this.term.write(msg.data.replace(/[●⏺🔵🔴⚫⬤]/g, "∙"));
           break;
         case "attached":
           this.setStatus("connected");
