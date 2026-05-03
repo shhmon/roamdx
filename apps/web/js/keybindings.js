@@ -39,7 +39,12 @@ const Keybindings = {
       action: (tm) => scrollLine(tm, false),
     },
 
-    // Pane splits (Ctrl+Shift+D for split-down)
+    // Pane splits — overrides shell EOF (use `exit` to log out instead)
+    {
+      description: "Ctrl+D — split pane vertically (right)",
+      match: (e) => e.ctrlKey && !e.shiftKey && (e.key === "D" || e.key === "d"),
+      action: (tm) => sendTmuxCommand(tm, TMUX_PREFIX, "%"),
+    },
     {
       description: "Ctrl+Shift+D — split pane horizontally (down)",
       match: (e) => e.ctrlKey && e.shiftKey && (e.key === "D" || e.key === "d"),
@@ -73,6 +78,13 @@ const Keybindings = {
       description: "Ctrl+Shift+Enter — toggle pane zoom",
       match: (e) => e.ctrlKey && e.shiftKey && e.key === "Enter",
       action: (tm) => sendTmuxCommand(tm, TMUX_PREFIX, "z"),
+    },
+
+    // Close pane — overrides shell word-delete
+    {
+      description: "Ctrl+W — close current pane",
+      match: (e) => e.ctrlKey && !e.shiftKey && (e.key === "W" || e.key === "w"),
+      action: (tm) => sendTmuxCommand(tm, TMUX_PREFIX, "x"),
     },
   ],
 
