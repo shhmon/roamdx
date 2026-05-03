@@ -9,8 +9,15 @@ import { promisify } from "node:util";
 const exec = promisify(execFile);
 
 const UPLOAD_DIR = join(homedir(), ".roamdx", "uploads");
-const ALLOWED = new Set([".png", ".jpg", ".jpeg", ".webp", ".heic", ".gif"]);
+const ALLOWED = new Set([".png", ".jpg", ".jpeg", ".webp", ".heic", ".heif", ".gif"]);
 const MAX_SIZE = 20 * 1024 * 1024; // 20MB
+const MAX_EDGE = 1600;
+const JPEG_QUALITY = 80;
+
+// sips can't re-encode animated GIFs without flattening; leave them alone.
+const SKIP_COMPRESS = new Set([".gif"]);
+// HEIC/HEIF can't be opened by most tools, so always convert to JPEG.
+const FORCE_CONVERT = new Set([".heic", ".heif"]);
 
 export async function uploadRoutes(app: FastifyInstance) {
   await mkdir(UPLOAD_DIR, { recursive: true });
@@ -32,23 +39,30 @@ export async function uploadRoutes(app: FastifyInstance) {
     }
 
     const id = randomBytes(6).toString("hex");
-    const filename = `${Date.now()}-${id}${ext}`;
-    const path = join(UPLOAD_DIR, filename);
-    await writeFile(path, buffer);
+    const baseName = `${Date.now()}-${id}`;
+    const srcPath = join(UPLOAD_DIR, `${baseName}${ext}`);
+    await writeFile(srcPath, buffer);
 
-    // Convert HEIC to PNG (macOS sips) — most tools can't read HEIC
-    if (ext === ".heic") {
-      const pngPath = path.replace(/\.heic$/, ".png");
-      try {
-        await exec("sips", ["-s", "format", "png", path, "--out", pngPath]);
-        await unlink(path);
-        return { path: pngPath, filename: pngPath.split("/").pop() };
-      } catch (err) {
-        req.log.error({ err }, "heic conversion failed");
-        // Fall through and return the original heic
-      }
+    if (SKIP_COMPRESS.has(ext)) {
+      return { path: srcPath, filename: `${baseName}${ext}` };
     }
 
-    return { path, filename };
+    const outExt = FORCE_CONVERT.has(ext) ? ".jpg" : ext;
+    const outPath = join(UPLOAD_DIR, `${baseName}${outExt}`);
+
+    try {
+      const args = ["-Z", String(MAX_EDGE)];
+      if (outExt === ".jpg" || outExt === ".jpeg") {
+        args.push("-s", "format", "jpeg", "-s", "formatOptions", String(JPEG_QUALITY));
+      }
+      args.push(srcPath, "--out", outPath);
+      await exec("sips", args);
+
+      if (outPath !== srcPath) await unlink(srcPath);
+      return { path: outPath, filename: `${baseName}${outExt}` };
+    } catch (err) {
+      req.log.error({ err }, "image compression failed");
+      return { path: srcPath, filename: `${baseName}${ext}` };
+    }
   });
 }
