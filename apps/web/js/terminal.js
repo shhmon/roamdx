@@ -121,7 +121,13 @@ const TerminalManager = {
         const now = Date.now();
         const dy = lastY - e.touches[0].clientY;
         const dt = Math.max(now - lastTime, 1);
-        velocity = 0.8 * velocity + 0.2 * (dy / dt * 1000); // smoothed velocity in px/s
+        const instant = dy / dt * 1000;
+        // If finger nearly still, decay velocity hard. Otherwise smooth.
+        if (Math.abs(instant) < 50) {
+          velocity *= 0.5;
+        } else {
+          velocity = 0.8 * velocity + 0.2 * instant;
+        }
         lastY = e.touches[0].clientY;
         lastTime = now;
         accum += dy;
