@@ -26,6 +26,11 @@ const App = {
       setTimeout(() => TerminalManager.fitAddon.fit(), 50);
     });
 
+    document.getElementById("hwkb-btn").addEventListener("click", () => {
+      const on = !document.getElementById("hwkb-btn").classList.contains("active");
+      this.setHwkbMode(on);
+    });
+
     document.getElementById("fullscreen-btn").addEventListener("click", () => {
       const app = document.getElementById("app");
       app.classList.toggle("fullscreen");
@@ -42,6 +47,9 @@ const App = {
     }
     if (localStorage.getItem("roamdx_keys") === "1") {
       document.getElementById("mobile-keys").classList.add("visible");
+    }
+    if (localStorage.getItem("roamdx_hwkb") === "1") {
+      this.setHwkbMode(true);
     }
 
     window.addEventListener("popstate", () => this.route());
@@ -78,6 +86,7 @@ const App = {
     document.getElementById("terminal-container").classList.add("hidden");
     document.getElementById("back-btn").classList.add("hidden");
     document.getElementById("keys-btn").classList.add("hidden");
+    document.getElementById("hwkb-btn").classList.add("hidden");
     document.getElementById("mobile-keys").classList.remove("visible");
     await this.refreshSessions();
     this.renderHomeGrid();
@@ -99,6 +108,7 @@ const App = {
     document.getElementById("terminal-container").classList.remove("hidden");
     document.getElementById("back-btn").classList.remove("hidden");
     document.getElementById("keys-btn").classList.remove("hidden");
+    document.getElementById("hwkb-btn").classList.remove("hidden");
 
     if (this.activeSession !== name) {
       this.activeSession = name;
@@ -186,6 +196,25 @@ const App = {
       this.navigate(`session/${encodeURIComponent(name)}`);
     });
     grid.appendChild(newTile);
+  },
+
+  // ── Hardware keyboard mode ──
+  // Suppresses iOS soft keyboard + accessory bar by setting inputmode=none on
+  // xterm's hidden textarea. Manual toggle since iOS gives no API to detect a
+  // connected hardware keyboard.
+
+  setHwkbMode(on) {
+    const btn = document.getElementById("hwkb-btn");
+    btn.classList.toggle("active", on);
+    localStorage.setItem("roamdx_hwkb", on ? "1" : "0");
+    const ta = document.querySelector("#terminal-container textarea.xterm-helper-textarea");
+    if (ta) {
+      if (on) ta.setAttribute("inputmode", "none");
+      else ta.removeAttribute("inputmode");
+      // Re-focus to make iOS pick up the change
+      ta.blur();
+      requestAnimationFrame(() => TerminalManager.term?.focus());
+    }
   },
 
   // ── Fullscreen ──

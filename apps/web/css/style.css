@@ -665,6 +665,14 @@ button:disabled {
   right: 10px;
   top: 36px;
 }
+#hwkb-btn {
+  right: 10px;
+  top: 62px;
+}
+#hwkb-btn.active {
+  color: var(--accent);
+  opacity: 1;
+}
 
 /* Hide back button on home view */
 #back-btn.hidden,
