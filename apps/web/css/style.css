@@ -805,7 +805,7 @@ button:disabled {
 }
 
 #app.fullscreen #terminal-container .xterm {
-  padding-top: calc(10px + env(safe-area-inset-top));
+  padding-top: 14px;
 }
 
 #app.fullscreen .content-toggle {
