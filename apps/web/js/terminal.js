@@ -73,7 +73,11 @@ const TerminalManager = {
     // Global app shortcuts (Ctrl+F, Ctrl+Q) win over the document listener
     // because xterm consumes the event when its textarea has focus.
     this.term.attachCustomKeyEventHandler((event) => {
-      if (GlobalKeys.handleGlobalKey(event, App)) return false;
+      if (window.GlobalKeys?.handleGlobalKey(event, App)) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        return false;
+      }
       if (Keybindings.handle(event, this)) return false;
       return true;
     });

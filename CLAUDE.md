@@ -25,3 +25,7 @@ When presenting comparisons, agent overviews, config summaries, or any structure
 ### Don't fumble
 
 When debugging an issue you don't understand, stop and ask for information (console output, error messages, what exactly happens) instead of making multiple blind guesses in a row. Diagnose first, then act.
+
+### Output for mobile
+
+The user often reads responses on a phone screen. Pick formatting and data visualisations that work in a narrow column: prefer compact tables, short bullets, brief paragraphs. Cut throat-clearing and prose padding. If a wide table won't fit, transpose it or split it. When in doubt, terser.
