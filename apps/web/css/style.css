@@ -541,6 +541,24 @@ button:disabled {
   min-height: 0;
   overflow: hidden;
   background: var(--bg);
+  position: relative;
+}
+
+#terminal-container.drag-over::after {
+  content: "Drop image to upload";
+  position: absolute;
+  inset: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(117, 176, 247, 0.15);
+  border: 2px dashed var(--accent);
+  border-radius: 8px;
+  color: var(--accent);
+  font-size: 14px;
+  font-weight: 600;
+  pointer-events: none;
+  z-index: 5;
 }
 
 #terminal-container.hidden {

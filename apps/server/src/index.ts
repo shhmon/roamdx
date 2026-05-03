@@ -2,12 +2,14 @@ import Fastify from "fastify";
 import fastifyWebsocket from "@fastify/websocket";
 import fastifyStatic from "@fastify/static";
 import fastifyCors from "@fastify/cors";
+import fastifyMultipart from "@fastify/multipart";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 import { config } from "./config.js";
 import { sessionRoutes } from "./routes/sessions.js";
 import { claudeRoutes } from "./routes/claude.js";
 import { statusRoutes } from "./routes/status.js";
+import { uploadRoutes } from "./routes/upload.js";
 import { handleConnection } from "./ws/handler.js";
 import { shutdown } from "./pty/manager.js";
 
@@ -16,6 +18,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const app = Fastify({ logger: true });
 
 await app.register(fastifyCors);
+await app.register(fastifyMultipart, { limits: { fileSize: 20 * 1024 * 1024 } });
 
 // Auth hook
 app.addHook("onRequest", async (req, reply) => {
@@ -48,6 +51,7 @@ app.register(async (app) => {
 await app.register(statusRoutes);
 await app.register(sessionRoutes);
 await app.register(claudeRoutes);
+await app.register(uploadRoutes);
 
 // Static files
 const webRoot = join(__dirname, "../../web");

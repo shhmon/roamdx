@@ -67,6 +67,7 @@ const TerminalManager = {
     updateHeight();
 
     Scroll.init(this);
+    Upload.init();
 
     // Intercept keys before xterm.js processes them — return false to suppress
     this.term.attachCustomKeyEventHandler((event) => {
