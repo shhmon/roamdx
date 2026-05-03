@@ -66,83 +66,13 @@ const TerminalManager = {
     window.addEventListener("resize", updateHeight);
     updateHeight();
 
-    // Scroll zone — iOS-style kinetic scrolling for tmux
-    const scrollZone = document.getElementById("scroll-zone");
-    if (scrollZone) {
-      let lastY = null;
-      let lastTime = 0;
-      let velocity = 0;
-      let accum = 0;
-      let amplitude = 0;
-      let target = 0;
-      let position = 0;
-      let timestamp = 0;
-      let inertiaFrame = null;
-      const TIME_CONSTANT = 325; // ms — matches iOS
-      const LINE_HEIGHT = 30; // px per terminal line
+    Scroll.init(this);
 
-      const sendScroll = (up) => {
-        const btn = up ? 97 : 96;
-        this.send({ type: "input", data: `\x1b[M${String.fromCharCode(btn)}\x21\x21` });
-      };
-
-      const flushLines = () => {
-        while (Math.abs(accum) >= LINE_HEIGHT) {
-          sendScroll(accum > 0);
-          accum -= accum > 0 ? LINE_HEIGHT : -LINE_HEIGHT;
-        }
-      };
-
-      const inertia = () => {
-        const elapsed = Date.now() - timestamp;
-        const delta = -amplitude * Math.exp(-elapsed / TIME_CONSTANT);
-        if (Math.abs(delta) > 0.5) {
-          const newPos = target + delta;
-          accum += newPos - position;
-          position = newPos;
-          flushLines();
-          inertiaFrame = requestAnimationFrame(inertia);
-        }
-      };
-
-      scrollZone.addEventListener("touchstart", (e) => {
-        if (inertiaFrame) cancelAnimationFrame(inertiaFrame);
-        lastY = e.touches[0].clientY;
-        lastTime = Date.now();
-        velocity = 0;
-        accum = 0;
-        position = 0;
-        e.preventDefault();
-      });
-
-      scrollZone.addEventListener("touchmove", (e) => {
-        if (lastY === null) return;
-        e.preventDefault();
-        const now = Date.now();
-        const dy = lastY - e.touches[0].clientY;
-        const dt = Math.max(now - lastTime, 1);
-        const instant = dy / dt * 1000;
-        // If finger nearly still, decay velocity hard. Otherwise smooth.
-        if (Math.abs(instant) < 50) {
-          velocity *= 0.5;
-        } else {
-          velocity = 0.8 * velocity + 0.2 * instant;
-        }
-        lastY = e.touches[0].clientY;
-        lastTime = now;
-        accum += dy;
-        position += dy;
-        flushLines();
-      });
-
-      scrollZone.addEventListener("touchend", () => {
-        lastY = null;
-        amplitude = 0.8 * velocity / 1000 * TIME_CONSTANT; // projected distance
-        target = Math.round(position + amplitude);
-        timestamp = Date.now();
-        inertiaFrame = requestAnimationFrame(inertia);
-      });
-    }
+    // Intercept keys before xterm.js processes them — return false to suppress
+    this.term.attachCustomKeyEventHandler((event) => {
+      if (Keybindings.handle(event, this)) return false;
+      return true;
+    });
 
     this.term.onData((data) => {
       if (this.ctrlActive) {
