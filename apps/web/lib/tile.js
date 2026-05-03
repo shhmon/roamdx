@@ -54,7 +54,7 @@ export function createNewTile({ onCreate }) {
 
 // Internal: swap the name span for an input until commit/escape.
 function startRename(nameEl, currentName, onCommit) {
-  const input = el("input", "tile-rename");
+  const input = InputMode.createHwkbInput("tile-rename");
   input.value = currentName;
   nameEl.replaceWith(input);
   input.focus();
