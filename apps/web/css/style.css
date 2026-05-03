@@ -19,7 +19,9 @@
   font-style: normal;
 }
 
-*, *::before, *::after {
+*,
+*::before,
+*::after {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
@@ -32,10 +34,10 @@
   --border: #2a3241;
   --text: #c3cfd9;
   --text-dim: #5a6a7a;
-  --accent: #75B0F7;
+  --accent: #75b0f7;
   --accent-hover: #5a9ae6;
   --danger: #f2767c;
-  --success: #9BE17D;
+  --success: #9be17d;
   --warning: #ffcb72;
   --radius: 6px;
   --font: "JetBrainsMono Nerd Font Mono", "JetBrainsMono NFM", monospace;
@@ -100,6 +102,7 @@ body {
   flex-direction: column;
   flex: 1;
   min-height: 0;
+  padding-top: env(safe-area-inset-top);
 }
 
 #app-scroll-trap {
@@ -128,7 +131,8 @@ body {
   flex-shrink: 0;
 }
 
-.topbar-left, .topbar-right {
+.topbar-left,
+.topbar-right {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -203,11 +207,11 @@ body {
 }
 
 #session-list li:hover {
-  background: rgba(255,255,255,0.05);
+  background: rgba(255, 255, 255, 0.05);
 }
 
 #session-list li.active {
-  background: rgba(117,176,247,0.12);
+  background: rgba(117, 176, 247, 0.12);
   color: var(--accent);
 }
 
@@ -221,9 +225,15 @@ body {
   transition: opacity 0.1s;
 }
 
-#session-list li:hover .delete-btn { opacity: 0.4; }
-#session-list li .delete-btn:hover { opacity: 1; }
-#session-list li.active .delete-btn { color: var(--accent); }
+#session-list li:hover .delete-btn {
+  opacity: 0.4;
+}
+#session-list li .delete-btn:hover {
+  opacity: 1;
+}
+#session-list li.active .delete-btn {
+  color: var(--accent);
+}
 
 /* ── Form elements ── */
 
@@ -232,7 +242,8 @@ body {
   gap: 4px;
 }
 
-input, textarea {
+input,
+textarea {
   background: var(--bg);
   border: 1px solid var(--border);
   color: var(--text);
@@ -245,11 +256,13 @@ input, textarea {
   transition: border-color 0.15s;
 }
 
-input:focus, textarea:focus {
+input:focus,
+textarea:focus {
   border-color: var(--accent);
 }
 
-input::placeholder, textarea::placeholder {
+input::placeholder,
+textarea::placeholder {
   color: var(--text-dim);
 }
 
@@ -264,7 +277,9 @@ button {
   cursor: pointer;
   border: none;
   border-radius: var(--radius);
-  transition: background 0.15s, opacity 0.15s;
+  transition:
+    background 0.15s,
+    opacity 0.15s;
 }
 
 button:disabled {
@@ -273,7 +288,7 @@ button:disabled {
 }
 
 .btn-primary {
-  background: rgba(117,176,247,0.15);
+  background: rgba(117, 176, 247, 0.15);
   color: var(--accent);
   font-weight: 600;
   padding: 6px 14px;
@@ -281,11 +296,11 @@ button:disabled {
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: rgba(117,176,247,0.25);
+  background: rgba(117, 176, 247, 0.25);
 }
 
 .btn-sm {
-  background: rgba(117,176,247,0.15);
+  background: rgba(117, 176, 247, 0.15);
   color: var(--accent);
   font-weight: 700;
   padding: 6px 10px;
@@ -294,7 +309,7 @@ button:disabled {
 }
 
 .btn-sm:hover {
-  background: rgba(117,176,247,0.25);
+  background: rgba(117, 176, 247, 0.25);
 }
 
 .icon-btn {
@@ -308,7 +323,7 @@ button:disabled {
 
 .icon-btn:hover {
   color: var(--text);
-  background: rgba(255,255,255,0.05);
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .claude-actions {
@@ -332,8 +347,13 @@ button:disabled {
 }
 
 @keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
 }
 
 /* ── Home view ── */
@@ -397,7 +417,9 @@ button:disabled {
   cursor: pointer;
   font-size: 12px;
   color: var(--text);
-  transition: background 0.15s, border-color 0.15s;
+  transition:
+    background 0.15s,
+    border-color 0.15s;
   padding: 12px;
   word-break: break-all;
   overflow: hidden;
@@ -471,7 +493,7 @@ button:disabled {
 }
 
 .home-tile:hover {
-  background: rgba(117,176,247,0.08);
+  background: rgba(117, 176, 247, 0.08);
   border-color: var(--accent);
 }
 
@@ -545,16 +567,22 @@ button:disabled {
   flex-shrink: 0;
 }
 
-.dot.connected   { background: var(--success); }
-.dot.connecting   { background: var(--warning); }
-.dot.disconnected { background: var(--danger); }
+.dot.connected {
+  background: var(--success);
+}
+.dot.connecting {
+  background: var(--warning);
+}
+.dot.disconnected {
+  background: var(--danger);
+}
 
 /* ── Auth overlay ── */
 
 #auth-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.85);
+  background: rgba(0, 0, 0, 0.85);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -602,13 +630,27 @@ button:disabled {
   opacity: 1;
 }
 
-.content-toggle { right: 10px; }
-.content-toggle-right { top: 10px; }
-.content-toggle-left { left: 10px; right: auto; top: 10px; }
-#keys-btn { right: 10px; top: 36px; }
+.content-toggle {
+  right: 10px;
+}
+.content-toggle-right {
+  top: 10px;
+}
+.content-toggle-left {
+  left: 10px;
+  right: auto;
+  top: 10px;
+}
+#keys-btn {
+  right: 10px;
+  top: 36px;
+}
 
 /* Hide back button on home view */
-#back-btn.hidden, #keys-btn.hidden { display: none; }
+#back-btn.hidden,
+#keys-btn.hidden {
+  display: none;
+}
 
 #scroll-zone {
   display: none;
@@ -632,6 +674,10 @@ button:disabled {
 #app.fullscreen #topbar,
 #app.fullscreen #sidebar {
   display: none;
+}
+
+#app.fullscreen #terminal-container .xterm {
+  padding-top: calc(10px + env(safe-area-inset-top));
 }
 
 #app.fullscreen .content-toggle {
@@ -727,5 +773,4 @@ button:disabled {
     width: 18px;
     height: 18px;
   }
-
 }

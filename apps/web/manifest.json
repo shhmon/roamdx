@@ -1,0 +1,8 @@
+{
+  "name": "RoamDX",
+  "short_name": "RoamDX",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#19212e",
+  "theme_color": "#19212e"
+}
