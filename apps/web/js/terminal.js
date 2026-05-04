@@ -225,6 +225,16 @@ const TerminalManager = {
   },
 
   applyZoom(scale) {
+    // Two-channel zoom:
+    //  - CSS `zoom` scales boxes/canvases/spacing (browser-zoom-equivalent).
+    //  - `--ui-scale` is read by per-element font-size calc()s, because
+    //    iOS Safari ignores `zoom` for px-typed text in nested contexts.
+    //  - Counter-scale #isl so the root container always fills the viewport
+    //    regardless of zoom (otherwise zoom < 1 leaves dead space at bottom).
+    //  - Counter-scale #app safe-area paddings so the notch inset stays the
+    //    same physical size at any zoom (zoom shrinks env() values too).
+    document.documentElement.style.setProperty("--ui-scale", String(scale));
+    document.documentElement.style.setProperty("--ui-inv-scale", String(1 / scale));
     document.documentElement.style.zoom = String(scale);
     const isl = document.getElementById("isl");
     if (isl) isl.style.height = `calc(var(--isl-vh, 1dvh) * 100 / ${scale})`;
