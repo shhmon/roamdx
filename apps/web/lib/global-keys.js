@@ -21,6 +21,11 @@ const list = [
     match: (e) => e.ctrlKey && !e.shiftKey && (e.key === "q" || e.key === "Q"),
     action: (app) => app.navigate("/"),
   },
+  {
+    description: "Ctrl+Shift+R — reload",
+    match: (e) => e.ctrlKey && e.shiftKey && (e.key === "r" || e.key === "R"),
+    action: () => window.location.reload(),
+  },
 
   // App zoom — Ctrl + / − / 0
   { description: "Ctrl++ — app zoom in",

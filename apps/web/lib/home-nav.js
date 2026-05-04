@@ -84,12 +84,12 @@ export function createHomeNav({ grid, isActive, onDelete, onFullscreen }) {
       e.preventDefault();
       return;
     }
-    if (e.ctrlKey && (e.key === "w" || e.key === "W")) {
+    if (e.ctrlKey && !e.shiftKey && (e.key === "w" || e.key === "W")) {
       deleteSelected();
       e.preventDefault();
       return;
     }
-    if (e.ctrlKey && (e.key === "r" || e.key === "R")) {
+    if (e.ctrlKey && !e.shiftKey && (e.key === "r" || e.key === "R")) {
       renameSelected();
       e.preventDefault();
       return;

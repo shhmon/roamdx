@@ -203,8 +203,8 @@ const TerminalManager = {
   // ── App zoom (CSS `zoom` on <html>) ──
   // Scales the entire UI like browser Cmd +/-. We counter-scale #isl so the
   // root container always fills the visible viewport regardless of zoom.
-  MIN_APP_ZOOM: 0.7,
-  MAX_APP_ZOOM: 1.6,
+  MIN_APP_ZOOM: 0.5,
+  MAX_APP_ZOOM: 1.5,
   APP_STEP: 0.1,
 
   setAppZoom(scale) {
