@@ -237,3 +237,6 @@ const TerminalManager = {
     dot.className = `dot ${state}`;
   },
 };
+
+// Expose on window so module scripts (lib/*) can reach it.
+window.TerminalManager = TerminalManager;

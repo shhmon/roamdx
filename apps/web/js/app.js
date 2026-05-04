@@ -35,8 +35,12 @@ const App = {
       }
     });
 
-    // Debug overlay: live-update layout numbers when visible.
+    // Debug overlay: live-update layout numbers + last keypress when visible.
     const debugEl = document.getElementById("debug-overlay");
+    document.addEventListener("keydown", (e) => {
+      debugEl.dataset.lastKey =
+        `key="${e.key}" code="${e.code}" ctrl=${e.ctrlKey?1:0} shift=${e.shiftKey?1:0} meta=${e.metaKey?1:0} alt=${e.altKey?1:0}`;
+    }, true);
     const debugTick = () => {
       if (debugEl.classList.contains("hidden")) return;
       const isl = document.getElementById("isl");
@@ -47,7 +51,10 @@ const App = {
         `vv.h=${vv?.height|0} inner.h=${window.innerHeight}\n` +
         `--isl-vh=${cssVh} (×100=${(parseFloat(cssVh)*100)|0})\n` +
         `#isl rect: top=${r.top|0} bot=${r.bottom|0} h=${r.height|0}\n` +
-        `body.h=${document.body.getBoundingClientRect().height|0}`;
+        `body.h=${document.body.getBoundingClientRect().height|0}\n` +
+        `lastKey=${debugEl.dataset.lastKey || "—"}\n` +
+        `lastBind=${debugEl.dataset.lastBinding || "—"}\n` +
+        `zooms=${debugEl.dataset.zooms || "—"}`;
     };
     setInterval(debugTick, 200);
     document.getElementById("back-btn").addEventListener("click", () => this.navigate("/"));
@@ -202,6 +209,11 @@ const App = {
       onOpen: () => this.refreshFabState(),
     });
 
+    // Don't let menu items steal focus from the terminal.
+    content.addEventListener("mousedown", (e) => {
+      if (e.target.closest("button")) e.preventDefault();
+    });
+
     content.addEventListener("click", (e) => {
       // Zoom rows: handle inline (don't close the menu — let the user keep tapping).
       const zoomBtn = e.target.closest("[data-action]");
@@ -251,6 +263,13 @@ const App = {
       for (const k of keys) TerminalManager.send({ type: "input", data: k });
     };
     const grid = document.getElementById("cmd-grid");
+    // Stop the cmd buttons from stealing focus from the terminal — without
+    // this each tap deselects the xterm hidden textarea on iOS.
+    grid.addEventListener("mousedown", (e) => {
+      // Don't block the cmd toggle — Popover needs the click event.
+      if (e.target.closest("#quick-bar-toggle")) return;
+      if (e.target.closest("button")) e.preventDefault();
+    });
     // The input-bar is a child of cmd-grid but has its own click listener
     // (modifier arming logic). Skip those buttons here.
     grid.addEventListener("click", async (e) => {
