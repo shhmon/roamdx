@@ -92,6 +92,18 @@
             <span>Hardware keyboard</span>
             <span class="fab-state" data-state-for="hwkb"></span>
           </button>
+          <div class="fab-zoom" data-zoom="term">
+            <span class="fab-zoom-label">Terminal</span>
+            <button class="fab-zoom-btn" data-action="term-out">−</button>
+            <button class="fab-zoom-value" data-action="term-reset">100%</button>
+            <button class="fab-zoom-btn" data-action="term-in">+</button>
+          </div>
+          <div class="fab-zoom" data-zoom="app">
+            <span class="fab-zoom-label">App</span>
+            <button class="fab-zoom-btn" data-action="app-out">−</button>
+            <button class="fab-zoom-value" data-action="app-reset">100%</button>
+            <button class="fab-zoom-btn" data-action="app-in">+</button>
+          </div>
         </div>
 
         <div id="quick-actions" class="hidden">
@@ -122,21 +134,6 @@
               <button class="overlay-btn" data-action="paste" title="Paste from clipboard">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M9 2h6a1 1 0 0 1 1 1v2H8V3a1 1 0 0 1 1-1z"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
-                </svg>
-              </button>
-              <button class="overlay-btn" data-action="zoom-in" title="Zoom in">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-                </svg>
-              </button>
-              <button class="overlay-btn" data-action="zoom-out" title="Zoom out">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <line x1="5" y1="12" x2="19" y2="12"/>
-                </svg>
-              </button>
-              <button class="overlay-btn" data-action="zoom-reset" title="Reset font size">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><polyline points="3 3 3 8 8 8"/>
                 </svg>
               </button>
             </div>

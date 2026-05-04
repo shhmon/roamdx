@@ -7,12 +7,14 @@ const TerminalManager = {
   reconnectDelay: 1000,
 
   init() {
-    const savedFontSize = parseFloat(localStorage.getItem("roamdx_font_size"));
+    const savedTermSize = parseFloat(localStorage.getItem("roamdx_term_size"));
+    const savedAppZoom = parseFloat(localStorage.getItem("roamdx_app_zoom"));
+    if (Number.isFinite(savedAppZoom)) this.applyZoom(savedAppZoom);
     this.term = new Terminal({
       cursorBlink: true,
       drawBoldTextInBrightColors: true,
       minimumContrastRatio: 1,
-      fontSize: Number.isFinite(savedFontSize) ? savedFontSize : 14.2,
+      fontSize: Number.isFinite(savedTermSize) ? savedTermSize : 14.2,
       fontWeight: "500",
       fontWeightBold: "700",
       lineHeight: 1.05,
@@ -165,27 +167,55 @@ const TerminalManager = {
     }));
   },
 
-  // Font-size zoom. Persisted to localStorage so it survives reloads.
-  // Default 14.2 matches the original constructor value.
-  DEFAULT_FONT_SIZE: 14.2,
-  MIN_FONT_SIZE: 8,
-  MAX_FONT_SIZE: 28,
+  // ── Terminal font size (xterm only) ──
+  DEFAULT_TERM_SIZE: 14.2,
+  MIN_TERM_SIZE: 8,
+  MAX_TERM_SIZE: 28,
+  TERM_STEP: 1,
 
-  setFontSize(size) {
+  setTermSize(size) {
     if (!this.term) return;
-    const clamped = Math.max(this.MIN_FONT_SIZE, Math.min(this.MAX_FONT_SIZE, size));
+    const clamped = Math.max(this.MIN_TERM_SIZE, Math.min(this.MAX_TERM_SIZE, size));
     this.term.options.fontSize = clamped;
-    localStorage.setItem("roamdx_font_size", String(clamped));
+    localStorage.setItem("roamdx_term_size", String(clamped));
     this.scheduleRefit();
   },
-
-  zoomFont(delta) {
-    const current = this.term?.options.fontSize ?? this.DEFAULT_FONT_SIZE;
-    this.setFontSize(current + delta);
+  termZoomIn()    { this.setTermSize((this.term?.options.fontSize ?? this.DEFAULT_TERM_SIZE) + this.TERM_STEP); },
+  termZoomOut()   { this.setTermSize((this.term?.options.fontSize ?? this.DEFAULT_TERM_SIZE) - this.TERM_STEP); },
+  termZoomReset() { this.setTermSize(this.DEFAULT_TERM_SIZE); },
+  termZoomPercent() {
+    const size = this.term?.options.fontSize ?? this.DEFAULT_TERM_SIZE;
+    return Math.round((size / this.DEFAULT_TERM_SIZE) * 100);
   },
 
-  resetFont() {
-    this.setFontSize(this.DEFAULT_FONT_SIZE);
+  // ── App zoom (CSS `zoom` on <html>) ──
+  // Scales the entire UI like browser Cmd +/-. We counter-scale #isl so the
+  // root container always fills the visible viewport regardless of zoom.
+  MIN_APP_ZOOM: 0.7,
+  MAX_APP_ZOOM: 1.6,
+  APP_STEP: 0.1,
+
+  setAppZoom(scale) {
+    const clamped = Math.max(this.MIN_APP_ZOOM, Math.min(this.MAX_APP_ZOOM, scale));
+    localStorage.setItem("roamdx_app_zoom", String(clamped));
+    this.applyZoom(clamped);
+    this.scheduleRefit();
+  },
+  appZoomIn()    { this.setAppZoom(this.currentAppZoom() + this.APP_STEP); },
+  appZoomOut()   { this.setAppZoom(this.currentAppZoom() - this.APP_STEP); },
+  appZoomReset() { this.setAppZoom(1); },
+  currentAppZoom() {
+    const v = parseFloat(localStorage.getItem("roamdx_app_zoom"));
+    return Number.isFinite(v) ? v : 1;
+  },
+  appZoomPercent() {
+    return Math.round(this.currentAppZoom() * 100);
+  },
+
+  applyZoom(scale) {
+    document.documentElement.style.zoom = String(scale);
+    const isl = document.getElementById("isl");
+    if (isl) isl.style.height = `calc(var(--isl-vh, 1dvh) * 100 / ${scale})`;
   },
 
   attach(sessionId) {

@@ -203,6 +203,25 @@ const App = {
     });
 
     content.addEventListener("click", (e) => {
+      // Zoom rows: handle inline (don't close the menu — let the user keep tapping).
+      const zoomBtn = e.target.closest("[data-action]");
+      if (zoomBtn) {
+        const action = zoomBtn.dataset.action;
+        const zoomActions = {
+          "term-in":    () => TerminalManager.termZoomIn(),
+          "term-out":   () => TerminalManager.termZoomOut(),
+          "term-reset": () => TerminalManager.termZoomReset(),
+          "app-in":     () => TerminalManager.appZoomIn(),
+          "app-out":    () => TerminalManager.appZoomOut(),
+          "app-reset":  () => TerminalManager.appZoomReset(),
+        };
+        if (zoomActions[action]) {
+          zoomActions[action]();
+          this.refreshFabState();
+          return;
+        }
+      }
+      // Regular menu items close the menu after acting.
       const item = e.target.closest(".fab-item");
       if (!item) return;
       const action = item.dataset.action;
@@ -298,6 +317,11 @@ const App = {
     };
     set("hwkb", hwkb);
     set("fullscreen", fullscreen);
+    // Update zoom percentage labels
+    const termPctEl = document.querySelector('.fab-zoom-value[data-action="term-reset"]');
+    const appPctEl = document.querySelector('.fab-zoom-value[data-action="app-reset"]');
+    if (termPctEl) termPctEl.textContent = `${TerminalManager.termZoomPercent()}%`;
+    if (appPctEl) appPctEl.textContent = `${TerminalManager.appZoomPercent()}%`;
   },
 
   // ── Fullscreen ──

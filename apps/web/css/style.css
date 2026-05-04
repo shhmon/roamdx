@@ -743,6 +743,40 @@ button:disabled {
   color: var(--accent);
 }
 
+/* Chrome-style zoom row in the FAB menu */
+.fab-zoom {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  font-size: 13px;
+}
+.fab-zoom-label {
+  flex: 1;
+  color: var(--text);
+}
+.fab-zoom-btn,
+.fab-zoom-value {
+  background: none;
+  color: var(--text);
+  font-family: var(--font);
+  border: none;
+  padding: 4px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  min-width: 32px;
+  text-align: center;
+}
+.fab-zoom-btn:hover,
+.fab-zoom-value:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+.fab-zoom-value {
+  font-variant-numeric: tabular-nums;
+  color: var(--text-dim);
+  min-width: 50px;
+}
+
 /* ── Quick actions (transparent bottom-right) ── */
 
 /* Quick-actions: a full-width row pinned to the bottom of the terminal area.
