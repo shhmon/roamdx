@@ -8,7 +8,7 @@
 const ESC = "\x1b";
 const TAB = "\x09";
 
-export function createInputBar({ bar, terminalManager, body }) {
+export function createInputBar({ bar, paneBar, terminalManager, body }) {
   const armed = { shift: false, ctrl: false };
 
   function setArmed(mod, on) {
@@ -72,11 +72,13 @@ export function createInputBar({ bar, terminalManager, body }) {
 
   function show() {
     bar.classList.remove("hidden");
+    paneBar?.classList.remove("hidden");
     body.classList.add("input-bar-open");
     terminalManager.scheduleRefit?.();
   }
   function hide() {
     bar.classList.add("hidden");
+    paneBar?.classList.add("hidden");
     body.classList.remove("input-bar-open");
     clearArmed();
     terminalManager.scheduleRefit?.();

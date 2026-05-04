@@ -54,9 +54,11 @@ const App = {
 
     this.inputBar = InputBar.createInputBar({
       bar: document.getElementById("input-bar"),
+      paneBar: document.getElementById("pane-bar"),
       terminalManager: TerminalManager,
       body: document.body,
     });
+    this.initPaneBar();
     this.homeNav = HomeNav.createHomeNav({
       grid: document.getElementById("home-grid"),
       isActive: () => !document.getElementById("home-view").classList.contains("hidden"),
@@ -209,8 +211,6 @@ const App = {
         this.setHwkbMode(localStorage.getItem("roamdx_hwkb") !== "1");
       } else if (action === "fullscreen") {
         this.toggleFullscreen();
-      } else if (action === "wake") {
-        TerminalManager.send({ type: "wake" });
       }
       this.fabPopover.close();
     });
@@ -225,6 +225,34 @@ const App = {
       TerminalManager.term.focus();
     }
     this.refreshFabState();
+  },
+
+  initPaneBar() {
+    const TMUX_PREFIX = "\x02";
+    const send = (...keys) => {
+      for (const k of keys) TerminalManager.send({ type: "input", data: k });
+    };
+    document.getElementById("pane-bar").addEventListener("click", async (e) => {
+      const btn = e.target.closest("[data-action]");
+      if (!btn) return;
+      e.preventDefault();
+      switch (btn.dataset.action) {
+        case "paste": {
+          try {
+            const text = await navigator.clipboard.readText();
+            if (text) TerminalManager.send({ type: "input", data: text });
+          } catch (err) {
+            console.warn("[paste] clipboard read failed", err);
+          }
+          break;
+        }
+        case "wake":       TerminalManager.send({ type: "wake" }); break;
+        case "zoom":       send(TMUX_PREFIX, "z"); break;
+        case "close-pane": send(TMUX_PREFIX, "x"); break;
+        case "split-down": send(TMUX_PREFIX, '"'); break;
+      }
+      TerminalManager.term?.focus();
+    });
   },
 
   initQuickActions() {
