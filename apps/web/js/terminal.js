@@ -52,6 +52,18 @@ const TerminalManager = {
     this.term.open(container);
     this.fitAddon.fit();
 
+    // WebGL renderer for faster paints. Falls back silently if WebGL is
+    // unavailable (e.g. very old iOS / disabled accelerated graphics).
+    if (window.WebglAddon) {
+      try {
+        const webgl = new WebglAddon.WebglAddon();
+        webgl.onContextLoss?.(() => webgl.dispose());
+        this.term.loadAddon(webgl);
+      } catch (err) {
+        console.warn("[term] WebGL addon failed; using DOM renderer", err);
+      }
+    }
+
     new ResizeObserver(() => {
       this.fitAddon.fit();
       this.sendResize();
