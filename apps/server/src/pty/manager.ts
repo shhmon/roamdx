@@ -66,7 +66,6 @@ export function attachToSession(
   }
 
   att.clients.add(ws);
-  wakeAltScreen(att.proc, cols, rows);
 }
 
 export function detachClient(sessionId: string, ws: WebSocket): void {
