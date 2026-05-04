@@ -65,6 +65,12 @@ const App = {
       body: document.body,
     });
     this.initPaneBar();
+    document.getElementById("upload-input").addEventListener("change", async (e) => {
+      const file = e.target.files?.[0];
+      if (file) await Upload.uploadAndInsert(file);
+      e.target.value = "";
+      TerminalManager.term?.focus();
+    });
     this.homeNav = HomeNav.createHomeNav({
       grid: document.getElementById("home-grid"),
       isActive: () => !document.getElementById("home-view").classList.contains("hidden"),
@@ -279,9 +285,6 @@ const App = {
       if (!btn) return;
       e.preventDefault();
       switch (btn.dataset.action) {
-        case "zoom-in":    TerminalManager.zoomFont(1); break;
-        case "zoom-out":   TerminalManager.zoomFont(-1); break;
-        case "zoom-reset": TerminalManager.resetFont(); break;
         case "paste": {
           try {
             const text = await navigator.clipboard.readText();
@@ -289,6 +292,10 @@ const App = {
           } catch (err) {
             console.warn("[paste] clipboard read failed", err);
           }
+          break;
+        }
+        case "upload": {
+          document.getElementById("upload-input").click();
           break;
         }
         case "wake":       TerminalManager.send({ type: "wake" }); break;

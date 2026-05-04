@@ -830,7 +830,7 @@ button:disabled {
   flex-wrap: wrap;
 }
 /* When the bottom input-bar is hidden (cmd closed), hide the upper rows. */
-body:not(.input-bar-open) #cmd-row-pane,
+body:not(.input-bar-open) #cmd-row-clip,
 body:not(.input-bar-open) #cmd-row-utils {
   display: none;
 }
