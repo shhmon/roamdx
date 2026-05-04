@@ -54,7 +54,6 @@ const App = {
 
     this.inputBar = InputBar.createInputBar({
       bar: document.getElementById("input-bar"),
-      paneBar: document.getElementById("pane-bar"),
       terminalManager: TerminalManager,
       body: document.body,
     });
@@ -232,11 +231,19 @@ const App = {
     const send = (...keys) => {
       for (const k of keys) TerminalManager.send({ type: "input", data: k });
     };
-    document.getElementById("pane-bar").addEventListener("click", async (e) => {
+    const grid = document.getElementById("cmd-grid");
+    // The input-bar is a child of cmd-grid but has its own click listener
+    // (modifier arming logic). Skip those buttons here.
+    grid.addEventListener("click", async (e) => {
+      if (e.target.closest("#input-bar")) return;
+      if (e.target.closest("#quick-bar-toggle")) return;
       const btn = e.target.closest("[data-action]");
       if (!btn) return;
       e.preventDefault();
       switch (btn.dataset.action) {
+        case "zoom-in":    TerminalManager.zoomFont(1); break;
+        case "zoom-out":   TerminalManager.zoomFont(-1); break;
+        case "zoom-reset": TerminalManager.resetFont(); break;
         case "paste": {
           try {
             const text = await navigator.clipboard.readText();

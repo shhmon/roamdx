@@ -7,11 +7,12 @@ const TerminalManager = {
   reconnectDelay: 1000,
 
   init() {
+    const savedFontSize = parseFloat(localStorage.getItem("roamdx_font_size"));
     this.term = new Terminal({
       cursorBlink: true,
       drawBoldTextInBrightColors: true,
       minimumContrastRatio: 1,
-      fontSize: 14.2,
+      fontSize: Number.isFinite(savedFontSize) ? savedFontSize : 14.2,
       fontWeight: "500",
       fontWeightBold: "700",
       lineHeight: 1.05,
@@ -162,6 +163,29 @@ const TerminalManager = {
       this.fitAddon.fit();
       this.sendResize();
     }));
+  },
+
+  // Font-size zoom. Persisted to localStorage so it survives reloads.
+  // Default 14.2 matches the original constructor value.
+  DEFAULT_FONT_SIZE: 14.2,
+  MIN_FONT_SIZE: 8,
+  MAX_FONT_SIZE: 28,
+
+  setFontSize(size) {
+    if (!this.term) return;
+    const clamped = Math.max(this.MIN_FONT_SIZE, Math.min(this.MAX_FONT_SIZE, size));
+    this.term.options.fontSize = clamped;
+    localStorage.setItem("roamdx_font_size", String(clamped));
+    this.scheduleRefit();
+  },
+
+  zoomFont(delta) {
+    const current = this.term?.options.fontSize ?? this.DEFAULT_FONT_SIZE;
+    this.setFontSize(current + delta);
+  },
+
+  resetFont() {
+    this.setFontSize(this.DEFAULT_FONT_SIZE);
   },
 
   attach(sessionId) {

@@ -772,22 +772,21 @@ button:disabled {
   margin-left: auto;
 }
 
-#input-cluster {
-  display: flex;
-  align-items: flex-end;
-  gap: 8px;
-}
-#cluster-left {
+/* Cmd menu: bottom-left anchored grid that grows up + right when opened. */
+#cmd-grid {
   display: flex;
   flex-direction: column;
   gap: 8px;
+  align-items: flex-start;
 }
-#pane-bar {
+.cmd-row {
   display: flex;
-  flex-direction: column-reverse;
   gap: 8px;
+  flex-wrap: wrap;
 }
-#pane-bar.hidden {
+/* When the bottom input-bar is hidden (cmd closed), hide the upper rows. */
+body:not(.input-bar-open) #cmd-row-pane,
+body:not(.input-bar-open) #cmd-row-utils {
   display: none;
 }
 
