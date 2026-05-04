@@ -61,3 +61,29 @@ export const RenameSessionBody = v.object({
 export const ClaudeTaskBody = v.object({
   prompt: v.pipe(v.string(), v.minLength(1)),
 });
+
+// ── Agent (Roamer) ──
+
+export const ReadPaneQuery = v.object({
+  tail: v.optional(v.pipe(v.string(), v.transform(Number), v.number(), v.integer(), v.minValue(1))),
+  raw: v.optional(v.picklist(["true", "false", "1", "0"])),
+});
+
+export const SendKeysBody = v.object({
+  text: v.string(),
+});
+
+export const SendSpecialBody = v.object({
+  key: v.pipe(v.string(), v.minLength(1)),
+});
+
+export const WaitUntilBody = v.object({
+  pattern: v.pipe(v.string(), v.minLength(1)),
+  flags: v.optional(v.string()),
+  timeoutMs: v.optional(v.pipe(v.number(), v.integer(), v.minValue(100), v.maxValue(60_000))),
+  pollMs: v.optional(v.pipe(v.number(), v.integer(), v.minValue(50), v.maxValue(5_000))),
+});
+
+export const EnsureSessionBody = v.object({
+  name: v.pipe(v.string(), v.minLength(1)),
+});

@@ -11,6 +11,7 @@ import { config } from "./config.js";
 import { log } from "./lib/log.js";
 import { sessionRoutes } from "./routes/sessions.js";
 import { claudeRoutes } from "./routes/claude.js";
+import { agentRoutes } from "./routes/agent.js";
 import { statusRoutes } from "./routes/status.js";
 import { uploadRoutes } from "./routes/upload.js";
 import { handleConnection } from "./ws/handler.js";
@@ -67,6 +68,7 @@ app.register(async (app) => {
 await app.register(statusRoutes);
 await app.register(sessionRoutes);
 await app.register(claudeRoutes);
+await app.register(agentRoutes);
 await app.register(uploadRoutes);
 
 // Static files
