@@ -34,7 +34,10 @@ export function createSessionTile(session, handlers) {
   const meta = el("div", "tile-meta");
   const created = new Date(parseInt(session.created) * 1000);
   const path = shortPath(session.path);
-  meta.innerHTML = `<span>${session.command || "zsh"}${path ? " · " + path : ""}</span><span>${timeAgo(created)}</span>`;
+  meta.innerHTML =
+    `<span>${session.command || "zsh"}</span>` +
+    `<span class="tile-path">${path}</span>` +
+    `<span>${timeAgo(created)}</span>`;
 
   tile.append(close, name, canvas, meta);
   tile.addEventListener("click", (e) => {

@@ -471,6 +471,7 @@ button:disabled {
   width: 100%;
   cursor: text;
   border-bottom: 1px solid transparent;
+  flex-shrink: 0;
 }
 
 .tile-rename {
@@ -493,6 +494,15 @@ button:disabled {
   flex-direction: column;
   gap: 2px;
   margin-top: auto;
+  width: 100%;
+  min-width: 0;
+}
+.home-tile .tile-meta .tile-path {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  word-break: normal;
+  max-width: 100%;
 }
 
 .home-tile:hover,
