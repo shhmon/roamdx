@@ -127,7 +127,10 @@ const TerminalManager = {
       const msg = JSON.parse(event.data);
       switch (msg.type) {
         case "output":
-          this.term.write(msg.data.replace(/[●⏺🔵🔴⚫⬤]/g, "∙"));
+          // Claude Code prefixes its output lines with U+23FA (record button),
+          // which iOS renders as a chunky color emoji. Swap it for a clean
+          // monochrome bullet so it blends with the terminal text.
+          this.term.write(msg.data.replace(/⏺/g, "∙"));
           break;
         case "attached":
           this.setStatus("connected");
