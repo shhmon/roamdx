@@ -29,3 +29,16 @@ When debugging an issue you don't understand, stop and ask for information (cons
 ### Output for mobile
 
 The user often reads responses on a phone screen. Pick formatting and data visualisations that work in a narrow column: prefer compact tables, short bullets, brief paragraphs. Cut throat-clearing and prose padding. If a wide table won't fit, transpose it or split it. When in doubt, terser.
+
+### Roamer
+
+The `bin/roamer` CLI lets you read from and type into other tmux sessions on
+this machine. Use it when the user asks you to do something in another
+session ("check the build in pstan", "run the tests in roamdx"), or to
+coordinate work across panes. See `docs/roamer.md` for the full surface.
+
+Quick reference: `roamer list`, `roamer pane <name>`, `roamer keys <name> "<text>"`,
+`roamer special <name> Enter`, `roamer wait <name> "<regex>"`.
+
+`ROAMDX_TOKEN` and `ROAMDX_HOST` must be set in the shell. If the CLI errors
+with "ROAMDX_TOKEN is not set", ask the user to source their roamdx env.

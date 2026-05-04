@@ -1,0 +1,129 @@
+#!/usr/bin/env node
+// Roamer CLI — thin wrapper over the agent HTTP API.
+//
+// Auth: reads ROAMDX_TOKEN and ROAMDX_HOST from env. Falls back to
+// http://localhost:3001 if no host set.
+//
+// Usage:
+//   roamer list
+//   roamer pane <name> [--tail N] [--raw]
+//   roamer keys <name> <text...>
+//   roamer special <name> <key>          # Enter, Escape, C-c, Up, ...
+//   roamer wait <name> <pattern> [--timeout 10000] [--flags i]
+//   roamer ensure <name>
+
+const HOST = process.env.ROAMDX_HOST || "http://localhost:3001";
+const TOKEN = process.env.ROAMDX_TOKEN;
+
+if (!TOKEN) {
+  console.error("error: ROAMDX_TOKEN is not set");
+  process.exit(2);
+}
+
+async function call(method, path, body) {
+  const res = await fetch(HOST + path, {
+    method,
+    headers: {
+      "Authorization": `Bearer ${TOKEN}`,
+      ...(body ? { "Content-Type": "application/json" } : {}),
+    },
+    body: body ? JSON.stringify(body) : undefined,
+  });
+  const text = await res.text();
+  let data;
+  try { data = JSON.parse(text); } catch { data = text; }
+  if (!res.ok) {
+    console.error(`error: ${res.status} ${typeof data === "string" ? data : JSON.stringify(data)}`);
+    process.exit(1);
+  }
+  return data;
+}
+
+function takeFlag(args, name) {
+  const i = args.indexOf("--" + name);
+  if (i === -1) return undefined;
+  const val = args[i + 1];
+  args.splice(i, 2);
+  return val;
+}
+function takeBool(args, name) {
+  const i = args.indexOf("--" + name);
+  if (i === -1) return false;
+  args.splice(i, 1);
+  return true;
+}
+
+const [, , cmd, ...rest] = process.argv;
+
+(async () => {
+  switch (cmd) {
+    case "list": {
+      const { sessions } = await call("GET", "/api/agent/sessions");
+      for (const s of sessions) {
+        console.log(`${s.name}\t${s.command}\t${s.path}`);
+      }
+      break;
+    }
+    case "pane": {
+      const [name] = rest;
+      if (!name) usage();
+      const tail = takeFlag(rest, "tail");
+      const raw = takeBool(rest, "raw");
+      const qs = new URLSearchParams();
+      if (tail) qs.set("tail", tail);
+      if (raw) qs.set("raw", "true");
+      const q = qs.toString() ? `?${qs}` : "";
+      const { content } = await call("GET", `/api/agent/sessions/${encodeURIComponent(name)}/pane${q}`);
+      process.stdout.write(content);
+      if (!content.endsWith("\n")) process.stdout.write("\n");
+      break;
+    }
+    case "keys": {
+      const [name, ...textParts] = rest;
+      if (!name || textParts.length === 0) usage();
+      const text = textParts.join(" ");
+      await call("POST", `/api/agent/sessions/${encodeURIComponent(name)}/keys`, { text });
+      break;
+    }
+    case "special": {
+      const [name, key] = rest;
+      if (!name || !key) usage();
+      await call("POST", `/api/agent/sessions/${encodeURIComponent(name)}/special`, { key });
+      break;
+    }
+    case "wait": {
+      const [name, pattern] = rest;
+      if (!name || !pattern) usage();
+      const timeoutMs = parseInt(takeFlag(rest, "timeout") ?? "10000", 10);
+      const flags = takeFlag(rest, "flags");
+      const { matched } = await call("POST", `/api/agent/sessions/${encodeURIComponent(name)}/wait`, {
+        pattern, flags, timeoutMs,
+      });
+      if (!matched) process.exit(3);
+      break;
+    }
+    case "ensure": {
+      const [name] = rest;
+      if (!name) usage();
+      const { created } = await call("POST", `/api/agent/sessions`, { name });
+      console.log(created ? "created" : "exists");
+      break;
+    }
+    default:
+      usage();
+  }
+})().catch((err) => {
+  console.error("fatal:", err.message || err);
+  process.exit(1);
+});
+
+function usage() {
+  console.error(`usage:
+  roamer list
+  roamer pane <name> [--tail N] [--raw]
+  roamer keys <name> <text...>
+  roamer special <name> <key>
+  roamer wait <name> <pattern> [--timeout 10000] [--flags i]
+  roamer ensure <name>`);
+  process.exit(2);
+}
