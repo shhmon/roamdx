@@ -193,6 +193,7 @@ const App = {
 
   setHwkbMode(on) {
     localStorage.setItem("roamdx_hwkb", on ? "1" : "0");
+    document.body.classList.toggle("hwkb-on", on);
     const ta = document.querySelector("#terminal-container textarea.xterm-helper-textarea");
     if (ta) {
       if (on) ta.setAttribute("inputmode", "none");

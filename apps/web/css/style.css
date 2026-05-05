@@ -698,6 +698,9 @@ button:disabled {
 #back-btn.hidden,
 #fab-menu-btn.hidden,
 #fab-menu.hidden,
+body.hwkb-on #quick-actions {
+  display: none;
+}
 #quick-actions.hidden {
   display: none;
 }

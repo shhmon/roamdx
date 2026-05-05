@@ -26,6 +26,11 @@ const list = [
     match: (e) => e.ctrlKey && e.shiftKey && (e.key === "r" || e.key === "R"),
     action: () => window.location.reload(),
   },
+  {
+    description: "Ctrl+, — toggle hardware keyboard mode",
+    match: (e) => e.ctrlKey && !e.shiftKey && e.key === ",",
+    action: (app) => app.setHwkbMode(localStorage.getItem("roamdx_hwkb") !== "1"),
+  },
 
   // App zoom — Ctrl + / − / 0
   { description: "Ctrl++ — app zoom in",
